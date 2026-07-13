@@ -9,1222 +9,1545 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --navy:#1C2530;
-    --navy-2:#243040; 
-    --paper:#F6F4EF; 
-    --paper-2:#FFFFFF;
-    --ink:#20262C; 
-    --ink-soft:#5B6570; 
-    --ink-faint:#8B8F94;
-    --line:#DEDACF; 
-    --line-strong:#C7C2B5;
-    --amber:#C97F1E; 
-    --amber-bg:#FBEEDA; 
-    --amber-line:#E8C286;
-    --steel:#33536C; 
-    --steel-bg:#E8EEF2;
-    --green:#3F7A55; 
-    --green-bg:#E4F0E7; 
-    --green-line:#B7D6C1;
-    --red:#AE4636; 
-    --red-bg:#F7E4E0; 
-    --red-line:#E3B4A8;
-    --gray:#75797D;
-    --gray-bg:#ECEAE5;
-    --mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
-    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --radius:8px;
-  }
-  *{
-    box-sizing: border-box;
-    margin:0; padding:0;
-    font-family: var(--sans);
-    -webkit-font-smoothing: antialiased;
-  }
-  body{
-    background: var(--paper);
-    color: var(--ink);
-    display: flex;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-  
-  /* Sidebar */
-  .sidebar{
-    width: 240px;
-    background: var(--navy);
-    color: #FFF;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    border-right: 1px solid var(--navy-2);
-  }
-  .brand-area{
-    padding: 24px 20px;
-    border-bottom: 1px solid var(--navy-2);
-  }
-  .brand-sub{
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--amber);
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-  .brand-title{
-    font-size: 18px;
-    font-weight: 700;
-    color: #FFF;
-  }
-  .nav-list{
-    list-style: none;
-    padding: 16px 0;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .nav-item{
-    padding: 10px 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 14px;
-    color: #A0AEC0;
-    transition: all 0.15s ease;
-  }
-  .nav-item:hover{
-    background: rgba(255,255,255,0.04);
-    color: #FFF;
-  }
-  .nav-item.active{
-    background: var(--navy-2);
-    color: #FFF;
-    border-left: 4px solid var(--amber);
-    padding-left: 16px;
-  }
-  .nav-icon{
-    font-family: var(--mono);
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--ink-faint);
-    width: 20px;
-  }
-  .nav-item.active .nav-icon{
-    color: var(--amber);
-  }
-  
-  /* Main Workspace */
-  .main-content{
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    background: var(--paper);
-    min-width: 0;
-  }
-  .top-bar{
-    height: 64px;
-    background: var(--paper-2);
-    border-bottom: 1px solid var(--line);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-  }
-  .view-title{
-    font-size: 18px;
-    font-weight: 700;
-  }
-  .role-selector{
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
-  .role-select{
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--line-strong);
-    background: var(--paper-2);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-  }
-  
-  .view-container{
-    padding: 32px;
-    overflow-y: auto;
-    flex-grow: 1;
-  }
-  
-  /* Utility Components */
-  .card{
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-bottom: 24px;
-  }
-  .stats-grid{
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
-  }
-  .stat-card{
-    background: var(--paper-2);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 20px;
-  }
-  .stat-val{
-    font-size: 32px;
-    font-weight: 700;
-    font-family: var(--mono);
-    margin-bottom: 4px;
-  }
-  .stat-lbl{
-    font-size: 13px;
-    color: var(--ink-soft);
-  }
-  
-  /* Buttons & Forms */
-  .btn{
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    border: 1px solid transparent;
-    transition: all 0.15s ease;
-    gap: 8px;
-  }
-  .btn-primary{
-    background: var(--navy);
-    color: #FFF;
-  }
-  .btn-primary:hover{ background: var(--navy-2); }
-  .btn-secondary{
-    background: var(--paper-2);
-    border-color: var(--line-strong);
-    color: var(--ink);
-  }
-  .btn-secondary:hover{ background: var(--paper); }
-  .btn-danger{
-    background: var(--red-bg);
-    color: var(--red);
-    border-color: var(--red-line);
-  }
-  .btn-danger:hover{ background: #F2D6CE; }
-  
-  .form-group{
-    margin-bottom: 16px;
-  }
-  .form-label{
-    display: block;
-    font-size: 12.5px;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: var(--ink);
-  }
-  .form-input, .form-select, .form-textarea{
-    width: 100%;
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--line-strong);
-    background: var(--paper-2);
-    font-size: 14px;
-    color: var(--ink);
-  }
-  .form-input:focus, .form-select:focus, .form-textarea:focus{
-    outline: none;
-    border-color: var(--navy);
-  }
-  
-  /* Status Pills */
-  .pill{
-    display: inline-flex;
-    align-items: center;
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .pill-operational{ background: var(--green-bg); color: var(--green); }
-  .pill-intervention{ background: var(--amber-bg); color: var(--amber); }
-  .pill-failure{ background: var(--red-bg); color: var(--red); }
-  .pill-pm-due{ background: var(--steel-bg); color: var(--steel); }
-  
-  /* Lists & Tables */
-  .data-table{
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13.5px;
-  }
-  .data-table th{
-    background: var(--paper);
-    padding: 12px 16px;
-    font-weight: 600;
-    color: var(--ink-soft);
-    border-bottom: 1px solid var(--line-strong);
-  }
-  .data-table td{
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--line);
-    background: var(--paper-2);
-  }
-  .data-table tr:hover td{
-    background: rgba(0,0,0,0.01);
-  }
-  
-  /* Layout Panels */
-  .split-panel{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-  }
-  @media(max-width: 900px){
-    .split-panel { grid-template-columns: 1fr; }
-  }
-  
-  /* Checkbox Custom lists */
-  .check-item{
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--line);
-  }
-  .check-item:last-child { border-bottom: none; }
-  .check-item input[type="checkbox"]{
-    margin-top: 3px;
-    width: 15px;
-    height: 15px;
-    cursor: pointer;
-  }
-  .check-label{
-    font-size: 13.5px;
-    line-height: 1.4;
-    cursor: pointer;
-  }
-  
-  .empty-state{
-    padding: 40px;
-    text-align: center;
-    color: var(--ink-soft);
-    font-size: 14px;
-    border: 2px dashed var(--line-strong);
-    border-radius: var(--radius);
-  }
-  
-  /* Print Sheet CSS overrides */
-  .print-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-  }
-  .label-box {
-    border: 1px dashed #aaa;
-    padding: 12px;
-    background: #fff;
-    text-align: center;
-    border-radius: 4px;
-  }
-  .qr-holder {
-    display: flex;
-    justify-content: center;
-    margin: 8px 0;
-  }
-  .qr-holder canvas, .qr-holder img {
-    max-width: 110px;
-    max-height: 110px;
-  }
+:root{
+--navy:#1C2530; --navy-2:#243040; --paper:#F6F4EF; --paper-2:#FFFFFF;
+--ink:#20262C; --ink-soft:#5B6570; --ink-faint:#8B8F94;
+--line:#DEDACF; --line-strong:#C7C2B5;
+--amber:#C97F1E; --amber-bg:#FBEEDA; --amber-line:#E8C286;
+--steel:#33536C; --steel-bg:#E8EEF2;
+--green:#3F7A55; --green-bg:#E4F0E7; --green-line:#B7D6C1;
+--red:#AE4636; --red-bg:#F7E4E0; --red-line:#E3B4A8;
+--gray:#75797D; --gray-bg:#ECEAE5;
+--mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+--sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+--radius:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{font-family:var(--sans); background:var(--paper); color:var(--ink); font-size:14px; line-height:1.5;}
+button, input, select, textarea{font-family:inherit; font-size:14px;}
+h1,h2,h3,h4{margin:0; font-weight:600; color:var(--ink);}
+p{margin:0;}
+a{color:var(--steel);}
+#storage-banner{background:var(--amber-bg); color:var(--amber); border-bottom:1px solid var(--amber-line); padding:8px 16px; font-size:12.5px; text-align:center; display:none;}
+.shell{display:flex; min-height:100vh;}
+.sidebar{width:216px; flex-shrink:0; background:var(--navy); color:#EDEAE2; display:flex; flex-direction:column; padding:18px 0;}
+.brand{padding:0 18px 18px; border-bottom:1px solid rgba(255,255,255,0.1); margin-bottom:10px;}
+.brand .mark{font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--amber); text-transform:uppercase;}
+.brand .title{font-size:15.5px; font-weight:600; color:#fff; margin-top:2px;}
+.nav-item{display:flex; align-items:center; gap:10px; padding:10px 18px; color:#C7CBD1; cursor:pointer; border-left:3px solid transparent; font-size:13.5px;}
+.nav-item:hover{background:rgba(255,255,255,0.05); color:#fff;}
+.nav-item.active{background:rgba(255,255,255,0.07); color:#fff; border-left-color:var(--amber);}
+.nav-icon{width:16px; text-align:center; font-family:var(--mono); font-size:12px; opacity:.8;}
+.nav-spacer{flex:1;}
+.role-tag{margin:10px 18px 0; font-size:11px; color:var(--ink-faint); background:rgba(255,255,255,0.06); padding:6px 10px; border-radius:6px; color:#AEB3B9;}
+.main{flex:1; display:flex; flex-direction:column; min-width:0;}
+.topbar{height:56px; flex-shrink:0; background:var(--paper-2); border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; padding:0 20px;}
+.topbar .view-title{font-size:16px; font-weight:600;}
+.topbar .role-switch{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--ink-soft);}
+.content{padding:22px; flex:1; overflow-y:auto;}
+.field{width:100%; padding:8px 10px; border:1px solid var(--line-strong); border-radius:6px; background:#fff; color:var(--ink);}
+.field:focus{outline:2px solid var(--steel); outline-offset:1px;}
+label.flabel{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:4px; font-weight:600;}
+.form-row{margin-bottom:14px;}
+.form-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+.btn{display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:6px; border:1px solid var(--line-strong); background:#fff; color:var(--ink); cursor:pointer; font-size:13.5px; font-weight:500;}
+.btn:hover{border-color:var(--ink-soft);}
+.btn-primary{background:var(--navy); border-color:var(--navy); color:#fff;}
+.btn-primary:hover{background:var(--navy-2);}
+.btn-amber{background:var(--amber); border-color:var(--amber); color:#fff;}
+.btn-danger{background:#fff; border-color:var(--red); color:var(--red);}
+.btn-sm{padding:5px 10px; font-size:12.5px;}
+.btn[disabled]{opacity:.5; cursor:not-allowed;}
+.card{background:var(--paper-2); border:1px solid var(--line); border-radius:12px; padding:16px 18px;}
+.metric-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;}
+.metric{background:var(--paper-2); border:1px solid var(--line); border-radius:10px; padding:14px 16px;}
+.metric .num{font-size:26px; font-weight:600; font-family:var(--mono);}
+.metric .lbl{font-size:12px; color:var(--ink-soft); margin-top:2px;}
+.grid-assets{display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:12px;}
+.asset-tag{position:relative; background:var(--paper-2); border:1px solid var(--line); border-left:6px solid var(--tag-color,var(--gray)); border-radius:8px; padding:12px 14px; cursor:pointer; display:flex; flex-direction:column; gap:6px;}
+.asset-tag:hover{border-color:var(--steel); box-shadow:0 0 0 1px var(--steel) inset;}
+.asset-tag .eyebrow{font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); display:flex; justify-content:space-between;}
+.asset-tag .num{font-family:var(--mono); font-size:16.5px; font-weight:600;}
+.asset-tag .meta{font-size:12px; color:var(--ink-soft);}
+.asset-tag .rowline{display:flex; justify-content:space-between; align-items:center; margin-top:2px;}
+.pill{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap;}
+.pill-operational{background:var(--green-bg); color:var(--green); border:1px solid var(--green-line);}
+.pill-requires_intervention{background:var(--amber-bg); color:var(--amber); border:1px solid var(--amber-line);}
+.pill-failure{background:var(--red-bg); color:var(--red); border:1px solid var(--red-line);}
+.pill-decommissioned{background:var(--gray-bg); color:var(--gray); border:1px solid var(--line-strong);}
+.chip{font-size:11px; font-weight:600; padding:2px 8px; border-radius:5px;}
+.chip-low{background:var(--gray-bg); color:var(--gray);}
+.chip-medium{background:var(--steel-bg); color:var(--steel);}
+.chip-critical{background:var(--red-bg); color:var(--red);}
+table.table{width:100%; border-collapse:collapse; font-size:13px;}
+table.table th{text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); border-bottom:1px solid var(--line-strong); padding:8px 10px;}
+table.table td{padding:9px 10px; border-bottom:1px solid var(--line);}
+table.table tr:hover td{background:#FBFAF7;}
+.toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:16px;}
+.toolbar .field{width:auto; min-width:150px;}
+.search-field{flex:1; min-width:180px;}
+.modal-backdrop{position:fixed; inset:0; background:rgba(20,24,28,0.5); display:flex; align-items:flex-start; justify-content:center; padding:40px 16px; z-index:100; overflow-y:auto;}
+.modal{background:#fff; border-radius:12px; width:100%; max-width:560px; padding:20px 22px; box-shadow:0 12px 40px rgba(0,0,0,0.25);}
+.modal h3{margin-bottom:4px;}
+.modal .sub{color:var(--ink-soft); font-size:12.5px; margin-bottom:16px;}
+.modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:18px; border-top:1px solid var(--line); padding-top:14px;}
+.toast-wrap{position:fixed; top:16px; right:16px; z-index:200; display:flex; flex-direction:column; gap:8px;}
+.toast{background:var(--navy); color:#fff; padding:10px 16px; border-radius:8px; font-size:13px; box-shadow:0 6px 18px rgba(0,0,0,0.2);}
+.checklist-item{display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--line); font-size:13px;}
+.checklist-item:last-child{border-bottom:none;}
+.timeline-item{border-left:2px solid var(--line-strong); padding:2px 0 14px 16px; position:relative; margin-left:4px;}
+.timeline-item::before{content:""; position:absolute; left:-5px; top:2px; width:8px; height:8px; border-radius:50%; background:var(--steel);}
+.timeline-item .t-head{font-size:13px; font-weight:600;}
+.timeline-item .t-meta{font-size:11.5px; color:var(--ink-soft); margin-top:1px;}
+.timeline-item .t-body{font-size:12.5px; color:var(--ink-soft); margin-top:4px;}
+.empty-state{text-align:center; padding:50px 20px; color:var(--ink-soft);}
+.empty-state h3{margin-bottom:6px; color:var(--ink);}
+.visitor-shell{min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--navy); padding:24px;}
+.visitor-card{background:#fff; border-radius:14px; padding:28px 26px; width:100%; max-width:420px;}
+.qr-box{background:#fff; padding:10px; border:1px solid var(--line); border-radius:8px; display:inline-block;}
+@media (max-width:780px){
+.shell{flex-direction:column;}
+.sidebar{width:100%; flex-direction:row; padding:0; position:fixed; bottom:0; left:0; right:0; z-index:50; overflow-x:auto; border-top:1px solid rgba(255,255,255,0.1);}
+.brand{display:none;}
+.nav-item{flex-direction:column; gap:2px; padding:8px 12px; border-left:none; border-top:3px solid transparent; font-size:10.5px; white-space:nowrap;}
+.nav-item.active{border-left-color:transparent; border-top-color:var(--amber);}
+.role-tag{display:none;}
+.nav-spacer{display:none;}
+.main{padding-bottom:58px;}
+.form-grid{grid-template-columns:1fr;}
+}
 </style>
 </head>
 <body>
-
-<div class="sidebar" id="sidebar-nav">
-  <div class="brand-area">
-    <div class="brand-sub">CLUJ FACILITY</div>
-    <div class="brand-title">Asset Manager</div>
-  </div>
-  <ul class="nav-list" id="menu-items"></ul>
-</div>
-
-<div class="main-content">
-  <div class="top-bar">
-    <div class="view-title" id="current-view-title">Dashboard</div>
-    <div class="role-selector">
-      <span>Viewing as</span>
-      <select class="role-select" id="role-switch" onchange="changeRole(this.value)">
-        <option value="Admin">Admin</option>
-        <option value="Team user">Team user</option>
-        <option value="Vendor / handyman">Vendor / handyman</option>
-        <option value="Visitor">Visitor (public scan)</option>
-      </select>
-    </div>
-  </div>
-  
-  <div class="view-container" id="workspace"></div>
-</div>
-
+<div id="storage-banner">Cloud database connection unavailable. Changes cannot be saved until the connection is restored.</div>
+<div id="app"></div>
+<div class="toast-wrap" id="toast-wrap"></div>
 <script>
-/* ============================= CONFIGURATION HUB ============================= */
-const SUPABASE_URL = "https://jngpintjesnybpgzidbw.supabase.co";
-const SUPABASE_KEY = "sb_publishable_DTKA8kKFUwrGJZjCoSMfYA_H8WnMX2s";
-const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ============================= SYSTEM CONSTANTS & CONFIGS ============================= */
-const ROLES = ['Admin', 'Team user', 'Vendor / handyman', 'Visitor'];
-const ASSET_TYPES = [
-  { id: 'hvac', name: 'HVAC Unit' },
-  { id: 'electrical', name: 'Electrical Panel' },
-  { id: 'plumbing', name: 'Plumbing Booster' },
-  { id: 'fire-safety', name: 'Fire Extinguisher / Hydrant' },
-  { id: 'access-control', name: 'Turnstile / Automated Gate' }
-];
-
+/* ============================= CONSTANTS ============================= */
 const STATUS_DEF = {
-  'operational': { label: 'Operational', class: 'operational' },
-  'intervention': { label: 'Requires intervention', class: 'intervention' },
-  'failure': { label: 'Failure', class: 'failure' },
-  'pm-due': { label: 'Overdue PM (critical)', class: 'pm-due' }
+operational: {label:'Operational', color:'green'},
+requires_intervention: {label:'Requires intervention', color:'amber'},
+failure: {label:'Failure', color:'red'},
+decommissioned: {label:'Decommissioned', color:'gray'}
 };
-
-const ACTION_LABEL = {
-  'check': 'Check / Routine Patrol',
-  'pm': 'Preventive Maintenance',
-  'intervention': 'Breakdown Intervention'
+const PRIORITY_DEF = {
+low:{label:'Low'}, medium:{label:'Medium'}, critical:{label:'Critical'}
 };
-
-const CHECKLISTS = {
-  'hvac': {
-    'check': ['Verify operation status & controllers', 'Inspect external condenser for clutter', 'Listen for anomalous vibrations / compressor cycles'],
-    'pm': ['Clean/replace air handling filters', 'Check coolant pressures & pipeline leaks', 'Secure electrical terminals & draw current reads', 'Sanitize condensate drain pathways'],
-    'intervention': ['Recover circuit faults / reset controllers', 'Swap worn fan drives or contactors', 'Log component diagnostic codes']
-  },
-  'electrical': {
-    'check': ['Visual validation of closure tags & warning signs', 'Confirm pilot indicator system state', 'Ensure free physical perimeter around enclosure'],
-    'pm': ['Thermal tracking scan for contact hotspots', 'Torque compliance load on critical breakers', 'Vacuum structural particulate / dust layers', 'Verify secondary grounding bonding continuity'],
-    'intervention': ['Isolate failed sub-circuits completely', 'Replace non-compliant shorted breakers', 'Emergency failover testing sequence']
-  },
-  'plumbing': {
-    'check': ['Pressure gauge assessment against standard setpoints', 'Inspect structural manifold for active weeping', 'Acoustic verification of pump multi-staging cycle'],
-    'pm': ['Expansion vessel pre-charge adjustment', 'Lubrication metrics on pump bearing housings', 'Calibrate cut-in / cut-out pressure transducers'],
-    'intervention': ['Re-prime air-locked booster loops', 'Mechanical seal replacement module deployment', 'Control relay module swap']
-  },
-  'fire-safety': {
-    'check': ['Pressure needle check within safe green boundary', 'Verify tamper containment seals are intact', 'Confirm unblocked path to safety station'],
-    'pm': ['Weight monitoring matching factory specification', 'Nozzle / discharge hose structure integrity test', 'Hydrostatic certification data confirmation'],
-    'intervention': ['Immediate matching unit replacement deployment', 'Re-charging deployment workflow log', 'Valve housing rebuild assembly']
-  },
-  'access-control': {
-    'check': ['Validate reader response with reference card', 'Visual assessment of mechanical alignment closing state', 'Obstruction detection photocell trigger test'],
-    'pm': ['Lubricate drive linkage hinges & internal gearboxes', 'Backup battery load drop-down tests', 'Clean optical path sensor lenses', 'Firmware integrity confirmation cycle'],
-    'intervention': ['Emergency override physical release activation test', 'Solenoid assembly mechanical replacement', 'Controller network interface card reset']
-  }
+const ACTION_LABEL = {check:'Check', pm:'Preventive maintenance', intervention:'Intervention'};
+const DEFAULT_TYPES = [
+{id:'electrical-socket', name:'Electrical Socket',
+check:['No visible scorch marks or discoloration','Cover plate intact and secure','Socket tests live with a device','Grounding pin present and secure'],
+pm:['Tightened terminal screws','Cleaned contacts','Insulation resistance tested','Cover plate replaced if damaged']},
+{id:'adjustable-desk', name:'Adjustable Desk',
+check:['Height adjustment operates smoothly','No unusual noise when raising/lowering','Stable at all heights','Cables and cable tray intact'],
+pm:['Lubricated moving mechanism','Checked and tightened frame bolts','Tested full range of motion','Weight capacity sticker legible']},
+{id:'regular-desk', name:'Regular Desk',
+check:['No structural damage or wobbling','Surface free of major damage','Edge banding intact'],
+pm:['Tightened all fasteners','Touched up surface finish if needed']},
+{id:'ergonomic-chair', name:'Ergonomic Chair',
+check:['Gas lift raises/lowers smoothly','Armrests adjust and lock properly','Casters roll freely','Backrest tilt mechanism functions','No tears in upholstery'],
+pm:['Lubricated gas lift and tilt mechanism','Tightened all bolts','Worn casters replaced','Upholstery cleaned']},
+{id:'ups', name:'UPS',
+check:['Battery status indicator normal','No error codes on display','Load level within safe range','Vents unobstructed'],
+pm:['Battery voltage tested','Firmware/settings verified','Vents cleaned','Self-test / load test run']},
+{id:'diesel-generator', name:'Diesel Generator',
+check:['Fuel level adequate','No visible leaks','Battery charge indicator normal','Control panel free of fault codes'],
+pm:['Oil and filter changed','Coolant level checked','Battery tested / replaced if needed','Test run under load performed','Air filter inspected / replaced']},
+{id:'cooling-equipment', name:'Cooling Equipment',
+check:['Airflow normal at vents','No unusual noise or vibration','Thermostat reading within range','No visible leaks'],
+pm:['Filters cleaned / replaced','Coils cleaned','Refrigerant level checked','Condensate drain cleared','Electrical connections inspected']}
+];
+const ROLE_NAV = {
+admin:['dashboard','assets','log-action','scan','pm','reports','settings'],
+user:['dashboard','assets','log-action','scan','pm','reports'],
+vendor:['scan','log-action','reports'],
+visitor:[]
 };
-
-/* ============================= SYSTEM STATE ============================= */
+const NAV_META = {
+dashboard:{label:'Dashboard', icon:'DB'},
+assets:{label:'Assets', icon:'AS'},
+'log-action':{label:'Log action', icon:'LA'},
+scan:{label:'Scan / lookup', icon:'SC'},
+pm:{label:'PM schedule', icon:'PM'},
+reports:{label:'Reports', icon:'RP'},
+settings:{label:'Settings', icon:'ST'}
+};
+/* ============================= STATE ============================= */
 let STATE = {
-  role: 'Admin',
-  route: 'dashboard',
-  assets: [],
-  actions: [],
-  selectedAsset: null
+role:'admin',
+route:'dashboard',
+assets:[],
+actions:[],
+types:[],
+pmSchedules:[],
+storageOk:true,
+loaded:false,
+selectedAsset:null,
+logPrefill:null
 };
-
-/* ============================= INITIALIZATION ============================= */
-window.addEventListener('DOMContentLoaded', async () => {
-  await syncWithDatabase();
-  initView();
+function getState(){ return STATE; }
+/* ============================= CLOUD DATABASE (SUPABASE) ============================= */
+const SUPABASE_URL = 'https://jngpintjesnybpgzidbw.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_DTKA8kKFUwrGJZjCoSMfYA_H8WnMX2s';
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false
+  }
 });
 
-async function syncWithDatabase() {
-  try {
-    const { data: dbAssets, error: assetErr } = await supabaseClient.from('assets').select('*');
-    if (assetErr) throw assetErr;
-    
-    const { data: dbActions, error: actionErr } = await supabaseClient.from('action_logs').select('*');
-    if (actionErr) throw actionErr;
+let realtimeChannel = null;
+let cloudRefreshTimer = null;
+let cloudRefreshInProgress = false;
+let cloudPollTimer = null;
 
-    STATE.assets = dbAssets || [];
-    STATE.actions = dbActions || [];
-  } catch (err) {
-    console.error("Database sync failed.", err);
+function setCloudStatus(ok, message){
+  STATE.storageOk = Boolean(ok);
+  const banner = document.getElementById('storage-banner');
+  if(banner){
+    if(ok){
+      banner.style.display = 'none';
+    }else{
+      banner.textContent = message || 'Cloud database connection unavailable. Changes cannot be saved until the connection is restored.';
+      banner.style.display = 'block';
+    }
+  }
+
+  const pill = document.getElementById('cloud-state-pill');
+  if(pill){
+    pill.className = 'pill ' + (ok ? 'pill-operational' : 'pill-failure');
+    pill.textContent = ok ? 'Cloud connected' : 'Cloud offline';
+  }
+}
+
+function assetFromRow(row){
+  return {
+    assetNumber: row.asset_number,
+    assetId: row.asset_id || '',
+    typeId: row.type_id,
+    priority: row.priority || 'medium',
+    purchaseDate: row.purchase_date || '',
+    price: row.price === null || row.price === undefined ? undefined : Number(row.price),
+    status: row.status || 'operational',
+    createdAt: row.created_at
+  };
+}
+
+function assetToRow(asset){
+  return {
+    asset_number: asset.assetNumber,
+    asset_id: asset.assetId || null,
+    type_id: asset.typeId,
+    priority: asset.priority || 'medium',
+    purchase_date: asset.purchaseDate || null,
+    price: asset.price === undefined || asset.price === '' ? null : Number(asset.price),
+    status: asset.status || 'operational',
+    created_at: asset.createdAt || new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+}
+
+function actionFromRow(row){
+  return {
+    id: row.id,
+    type: row.action_type,
+    scope: row.scope,
+    assetNumbers: row.asset_numbers || [],
+    typeId: row.type_id || undefined,
+    notes: row.notes || undefined,
+    docLink: row.doc_link || undefined,
+    loggedBy: row.logged_by || undefined,
+    timestamp: row.logged_at,
+    checklist: row.checklist || undefined,
+    description: row.description || undefined,
+    resultingStatus: row.resulting_status || undefined,
+    docRef: row.doc_ref || undefined
+  };
+}
+
+function actionToRow(action){
+  return {
+    id: action.id,
+    action_type: action.type,
+    scope: action.scope,
+    asset_numbers: action.assetNumbers || [],
+    type_id: action.typeId || null,
+    notes: action.notes || null,
+    doc_link: action.docLink || null,
+    logged_by: action.loggedBy || null,
+    logged_at: action.timestamp || new Date().toISOString(),
+    checklist: action.checklist || null,
+    description: action.description || null,
+    resulting_status: action.resultingStatus || null,
+    doc_ref: action.docRef || null
+  };
+}
+
+function typeFromRow(row){
+  return {
+    id: row.id,
+    name: row.name,
+    check: Array.isArray(row.check_items) ? row.check_items : [],
+    pm: Array.isArray(row.pm_items) ? row.pm_items : []
+  };
+}
+
+function typeToRow(type){
+  return {
+    id: type.id,
+    name: type.name,
+    check_items: type.check || [],
+    pm_items: type.pm || [],
+    updated_at: new Date().toISOString()
+  };
+}
+
+function pmFromRow(row){
+  return {
+    assetNumber: row.asset_number,
+    intervalDays: row.interval_days === null ? null : Number(row.interval_days)
+  };
+}
+
+function pmToRow(schedule){
+  return {
+    asset_number: schedule.assetNumber,
+    interval_days: schedule.intervalDays === null || schedule.intervalDays === '' ? null : Number(schedule.intervalDays),
+    updated_at: new Date().toISOString()
+  };
+}
+
+async function safeGet(key){
+  try{
+    let query;
+
+    if(key === 'assets'){
+      query = supabaseClient.from('facility_assets').select('*').order('asset_number');
+      const {data, error} = await query;
+      if(error) throw error;
+      setCloudStatus(true);
+      return (data || []).map(assetFromRow);
+    }
+
+    if(key === 'actions'){
+      query = supabaseClient.from('facility_actions').select('*').order('logged_at', {ascending:false});
+      const {data, error} = await query;
+      if(error) throw error;
+      setCloudStatus(true);
+      return (data || []).map(actionFromRow);
+    }
+
+    if(key === 'asset-types'){
+      query = supabaseClient.from('facility_asset_types').select('*').order('name');
+      const {data, error} = await query;
+      if(error) throw error;
+      setCloudStatus(true);
+      return (data || []).map(typeFromRow);
+    }
+
+    if(key === 'pm-schedules'){
+      query = supabaseClient.from('facility_pm_schedules').select('*').order('asset_number');
+      const {data, error} = await query;
+      if(error) throw error;
+      setCloudStatus(true);
+      return (data || []).map(pmFromRow);
+    }
+
+    if(key.startsWith('doc:')){
+      const id = key.slice(4);
+      const {data, error} = await supabaseClient
+        .from('facility_documents')
+        .select('filename,mime,data_base64')
+        .eq('id', id)
+        .maybeSingle();
+      if(error) throw error;
+      setCloudStatus(true);
+      return data ? {filename:data.filename, mime:data.mime, data:data.data_base64} : null;
+    }
+
+    return null;
+  }catch(error){
+    console.error('Supabase read failed for', key, error);
+    setCloudStatus(false, 'Cloud database error: ' + (error.message || 'unable to load data'));
+    return null;
+  }
+}
+
+async function safeSet(key, value){
+  try{
+    let error = null;
+
+    if(key === 'assets'){
+      const rows = (value || []).map(assetToRow);
+      if(rows.length){
+        ({error} = await supabaseClient.from('facility_assets').upsert(rows, {onConflict:'asset_number'}));
+      }
+    }else if(key === 'actions'){
+      const rows = (value || []).map(actionToRow);
+      if(rows.length){
+        ({error} = await supabaseClient.from('facility_actions').upsert(rows, {onConflict:'id'}));
+      }
+    }else if(key === 'asset-types'){
+      const rows = (value || []).map(typeToRow);
+      if(rows.length){
+        ({error} = await supabaseClient.from('facility_asset_types').upsert(rows, {onConflict:'id'}));
+      }
+    }else if(key === 'pm-schedules'){
+      const rows = (value || []).map(pmToRow);
+      if(rows.length){
+        ({error} = await supabaseClient.from('facility_pm_schedules').upsert(rows, {onConflict:'asset_number'}));
+      }
+    }else if(key.startsWith('doc:')){
+      const id = key.slice(4);
+      ({error} = await supabaseClient.from('facility_documents').upsert({
+        id,
+        filename: value.filename,
+        mime: value.mime || 'application/octet-stream',
+        data_base64: value.data,
+        updated_at: new Date().toISOString()
+      }, {onConflict:'id'}));
+    }
+
+    if(error) throw error;
+    setCloudStatus(true);
+    return true;
+  }catch(error){
+    console.error('Supabase save failed for', key, error);
+    setCloudStatus(false, 'Cloud save failed: ' + (error.message || 'unknown error'));
+    toast('Cloud save failed. Your change was not stored.');
+    return false;
+  }
+}
+
+async function safeDelete(key){
+  try{
+    if(key.startsWith('doc:')){
+      const id = key.slice(4);
+      const {error} = await supabaseClient.from('facility_documents').delete().eq('id', id);
+      if(error) throw error;
+    }
+    setCloudStatus(true);
+    return true;
+  }catch(error){
+    console.error('Supabase delete failed for', key, error);
+    setCloudStatus(false, 'Cloud delete failed: ' + (error.message || 'unknown error'));
+    return false;
+  }
+}
+
+async function loadCloudState(renderAfter){
+  if(cloudRefreshInProgress) return false;
+  cloudRefreshInProgress = true;
+  try{
+    const [assets, actions, types, pm] = await Promise.all([
+      safeGet('assets'),
+      safeGet('actions'),
+      safeGet('asset-types'),
+      safeGet('pm-schedules')
+    ]);
+
+    const failed = [assets, actions, types, pm].some(value => value === null);
+    if(failed) return false;
+
+    STATE.assets = assets;
+    STATE.actions = actions;
+    STATE.types = types;
+    STATE.pmSchedules = pm;
+
+    if(renderAfter && STATE.loaded){
+      render();
+    }
+    return true;
+  }finally{
+    cloudRefreshInProgress = false;
+  }
+}
+
+function scheduleCloudRefresh(){
+  clearTimeout(cloudRefreshTimer);
+  cloudRefreshTimer = setTimeout(() => loadCloudState(true), 250);
+}
+
+function setupRealtimeSync(){
+  if(realtimeChannel) return;
+
+  realtimeChannel = supabaseClient
+    .channel('facility-app-live-sync')
+    .on('postgres_changes', {event:'*', schema:'public', table:'facility_assets'}, scheduleCloudRefresh)
+    .on('postgres_changes', {event:'*', schema:'public', table:'facility_actions'}, scheduleCloudRefresh)
+    .on('postgres_changes', {event:'*', schema:'public', table:'facility_asset_types'}, scheduleCloudRefresh)
+    .on('postgres_changes', {event:'*', schema:'public', table:'facility_pm_schedules'}, scheduleCloudRefresh)
+    .subscribe((status, error) => {
+      if(status === 'SUBSCRIBED'){
+        setCloudStatus(true);
+      }else if(status === 'CHANNEL_ERROR' || status === 'TIMED_OUT'){
+        console.error('Supabase realtime error', error);
+        setCloudStatus(false, 'Live sync is temporarily unavailable. The app will retry and refresh periodically.');
+      }
+    });
+
+  window.addEventListener('focus', () => loadCloudState(true));
+  document.addEventListener('visibilitychange', () => {
+    if(document.visibilityState === 'visible') loadCloudState(true);
+  });
+
+  cloudPollTimer = window.setInterval(() => {
+    if(document.visibilityState === 'visible') loadCloudState(true);
+  }, 15000);
+}
+
+function escapeHtml(str){
+if(str===undefined || str===null) return '';
+return String(str).replace(/[&<>"']/g, function(c){
+return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+});
+}
+function fmtDate(d){
+if(!d) return '—';
+try{ const dt = new Date(d); if(isNaN(dt)) return d; return dt.toISOString().slice(0,10); }catch(e){ return d; }
+}
+function fmtDateTime(d){
+try{ const dt = new Date(d); return dt.toLocaleString(); }catch(e){ return d; }
+}
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function toast(msg){
+const wrap = document.getElementById('toast-wrap');
+const el = document.createElement('div');
+el.className='toast'; el.textContent=msg;
+wrap.appendChild(el);
+setTimeout(()=>{ el.remove(); }, 3200);
+}
+function typeName(typeId){
+const t = STATE.types.find(t=>t.id===typeId);
+return t ? t.name : typeId;
+}
+function getAsset(assetNumber){
+return STATE.assets.find(a=>a.assetNumber===assetNumber);
+}
+function assetsOfType(typeId){
+return STATE.assets.filter(a=>a.typeId===typeId);
+}
+function actionsForAsset(assetNumber){
+return STATE.actions.filter(a=>a.assetNumbers.includes(assetNumber))
+.sort((a,b)=> new Date(b.timestamp) - new Date(a.timestamp));
+}
+function lastActionOfType(assetNumber, actionType){
+const list = actionsForAsset(assetNumber).filter(a=>a.type===actionType);
+return list.length ? list[0] : null;
+}
+/* ============================= INIT ============================= */
+async function init(){
+  STATE.loaded = false;
+  const loaded = await loadCloudState(false);
+
+  if(!loaded){
     STATE.assets = [];
     STATE.actions = [];
+    STATE.pmSchedules = [];
+    STATE.types = DEFAULT_TYPES;
+    setCloudStatus(false, 'The Supabase tables or access policies are not ready. Run the supplied SQL setup in Supabase.');
+  }else if(!STATE.types.length){
+    STATE.types = DEFAULT_TYPES;
+    await safeSet('asset-types', STATE.types);
   }
+
+  STATE.loaded = true;
+  render();
+  setupRealtimeSync();
 }
 
-function initView(){
-  buildSidebarMenu();
-  renderCurrentView();
+/* ============================= NAVIGATION ============================= */
+function navigate(route, opts){
+STATE.route = route;
+STATE.selectedAsset = (opts && opts.assetNumber) || null;
+STATE.logPrefill = (opts && opts.logPrefill) || null;
+render();
 }
-
-/* ============================= PERSISTENCE ROUTINES ============================= */
-async function pushAssetToDatabase(asset) {
-  try {
-    const { error } = await supabaseClient.from('assets').upsert(asset);
-    if (error) throw error;
-  } catch (e) {
-    console.error("Error updating asset profile layer:", e);
-  }
+function setRole(role){
+STATE.role = role;
+const allowed = ROLE_NAV[role];
+if(allowed.length && !allowed.includes(STATE.route)){
+STATE.route = allowed[0];
 }
-
-async function pushActionToDatabase(action) {
-  try {
-    const { error } = await supabaseClient.from('action_logs').insert(action);
-    if (error) throw error;
-  } catch (e) {
-    console.error("Error pushing historical field action:", e);
-  }
+render();
 }
-
-/* ============================= BUSINESS ENGINE LOGIC ============================= */
-function actionsForAsset(num){
-  return STATE.actions
-    .filter(x => x.assetNumber.toLowerCase() === num.toLowerCase())
-    .sort((a,b) => b.timestamp - a.timestamp);
+/* ============================= RENDER SHELL ============================= */
+function render(){
+const app = document.getElementById('app');
+if(!STATE.loaded){
+app.innerHTML = '<div style="padding:40px;color:var(--ink-soft)">Loading…</div>';
+return;
 }
-
-function calculateMetrics(){
-  let counts = { total: STATE.assets.length, operational:0, intervention:0, failure:0, pmDue:0 };
-  STATE.assets.forEach(a => {
-    if(a.status === 'operational') counts.operational++;
-    if(a.status === 'intervention') counts.intervention++;
-    if(a.status === 'failure') counts.failure++;
-    if(a.status === 'pm-due') counts.pmDue++;
-  });
-  return counts;
+if(STATE.role === 'visitor'){
+app.innerHTML = renderVisitor();
+attachVisitorEvents();
+return;
 }
-
-/* ============================= NAVIGATION & SIDEBAR UI ============================= */
-const MENU_CONFIG = [
-  { id: 'dashboard', lbl: 'Dashboard', icon: 'DB', roles: ['Admin', 'Team user', 'Vendor / handyman'] },
-  { id: 'assets', lbl: 'Assets', icon: 'AS', roles: ['Admin', 'Team user'] },
-  { id: 'log-action', lbl: 'Log action', icon: 'LA', roles: ['Admin', 'Team user', 'Vendor / handyman'] },
-  { id: 'scan-lookup', lbl: 'Scan / lookup', icon: 'SC', roles: ['Admin', 'Team user', 'Vendor / handyman'] },
-  { id: 'pm-schedule', lbl: 'PM schedule', icon: 'PM', roles: ['Admin', 'Team user'] },
-  { id: 'reports', lbl: 'Reports', icon: 'RP', roles: ['Admin'] },
-  { id: 'settings', lbl: 'Settings', icon: 'ST', roles: ['Admin'] }
-];
-
-function buildSidebarMenu(){
-  const container = document.getElementById('menu-items');
-  container.innerHTML = '';
-  
-  if(STATE.role === 'Visitor'){
-    document.getElementById('sidebar-nav').style.display = 'none';
-    return;
-  } else {
-    document.getElementById('sidebar-nav').style.display = 'flex';
-  }
-  
-  MENU_CONFIG.forEach(item => {
-    if(item.roles.includes(STATE.role)){
-      const li = document.createElement('li');
-      li.className = `nav-item ${STATE.route === item.id ? 'active' : ''}`;
-      li.onclick = () => navigateTo(item.id);
-      li.innerHTML = `<span class="nav-icon">${item.icon}</span> <span>${item.lbl}</span>`;
-      container.appendChild(li);
-    }
-  });
+const nav = ROLE_NAV[STATE.role];
+app.innerHTML = `
+<div class="shell">
+<div class="sidebar">
+<div class="brand">
+<div class="mark">Cluj Facility</div>
+<div class="title">Asset Manager</div>
+</div>
+${nav.map(r=>`
+<div class="nav-item ${STATE.route===r?'active':''}" onclick="navigate('${r}')">
+<span class="nav-icon">${NAV_META[r].icon}</span><span>${NAV_META[r].label}</span>
+</div>`).join('')}
+<div class="nav-spacer"></div>
+<div class="role-tag">Signed in as ${STATE.role}</div>
+</div>
+<div class="main">
+<div class="topbar">
+<div class="view-title">${currentViewTitle()}</div>
+<div class="role-switch">
+<span id="cloud-state-pill" class="pill ${STATE.storageOk?'pill-operational':'pill-failure'}">${STATE.storageOk?'Cloud connected':'Cloud offline'}</span>
+Viewing as
+<select class="field" style="width:auto;padding:5px 8px" onchange="setRole(this.value)">
+<option value="admin" ${STATE.role==='admin'?'selected':''}>Admin</option>
+<option value="user" ${STATE.role==='user'?'selected':''}>Team user</option>
+<option value="vendor" ${STATE.role==='vendor'?'selected':''}>Vendor / handyman</option>
+<option value="visitor" ${STATE.role==='visitor'?'selected':''}>Visitor (public scan)</option>
+</select>
+</div>
+</div>
+<div class="content" id="content"></div>
+</div>
+</div>`;
+const content = document.getElementById('content');
+if(STATE.route==='dashboard') content.innerHTML = renderDashboard();
+else if(STATE.route==='assets') content.innerHTML = renderAssets();
+else if(STATE.route==='asset-profile') content.innerHTML = assetProfileHtml(STATE.selectedAsset);
+else if(STATE.route==='log-action') content.innerHTML = renderLogAction();
+else if(STATE.route==='scan') content.innerHTML = renderScan();
+else if(STATE.route==='pm') content.innerHTML = renderPM();
+else if(STATE.route==='reports') content.innerHTML = renderReports();
+else if(STATE.route==='settings') content.innerHTML = renderSettings();
+attachRouteEvents();
 }
-
-function navigateTo(route, params = null){
-  STATE.route = route;
-  if(params) {
-    if(params.assetNumber) STATE.selectedAsset = params.assetNumber;
-  }
-  buildSidebarMenu();
-  renderCurrentView();
+function currentViewTitle(){
+if(STATE.route==='asset-profile') return 'Asset profile';
+return NAV_META[STATE.route] ? NAV_META[STATE.route].label : '';
 }
-
-function changeRole(val){
-  STATE.role = val;
-  if(!MENU_CONFIG.find(x => x.id === STATE.route).roles.includes(val)){
-    STATE.route = (val === 'Visitor') ? 'visitor-scan' : 'dashboard';
-  }
-  if(val === 'Visitor') STATE.route = 'visitor-scan';
-  buildSidebarMenu();
-  renderCurrentView();
+/* ============================= DASHBOARD ============================= */
+function renderDashboard(){
+const counts = {operational:0, requires_intervention:0, failure:0, decommissioned:0};
+STATE.assets.forEach(a=> counts[a.status] = (counts[a.status]||0)+1 );
+const critical = STATE.assets.filter(a=>a.priority==='critical' && a.status!=='decommissioned');
+const overdue = critical.filter(a=> pmStatusFor(a.assetNumber).overdue );
+const recent = STATE.actions.slice().sort((a,b)=>new Date(b.timestamp)-new Date(a.timestamp)).slice(0,8);
+return `
+<div class="metric-grid">
+<div class="metric"><div class="num">${STATE.assets.length}</div><div class="lbl">Total assets</div></div>
+<div class="metric"><div class="num" style="color:var(--green)">${counts.operational}</div><div class="lbl">Operational</div></div>
+<div class="metric"><div class="num" style="color:var(--amber)">${counts.requires_intervention}</div><div class="lbl">Requires intervention</div></div>
+<div class="metric"><div class="num" style="color:var(--red)">${counts.failure}</div><div class="lbl">Failure</div></div>
+<div class="metric"><div class="num" style="color:var(--red)">${overdue.length}</div><div class="lbl">Overdue PM (critical)</div></div>
+</div>
+${overdue.length ? `
+<h3 style="margin-bottom:10px;">Overdue preventive maintenance — critical assets</h3>
+<div class="card" style="margin-bottom:22px;">
+${overdue.map(a=>`
+<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+<div><span style="font-family:var(--mono);font-weight:600">${escapeHtml(a.assetNumber)}</span> — ${escapeHtml(typeName(a.typeId))}</div>
+<button class="btn btn-sm" onclick="viewAssetProfile('${escapeHtml(a.assetNumber)}')">View</button>
+</div>`).join('')}
+</div>` : '' }
+<h3 style="margin-bottom:10px;">Recent activity</h3>
+<div class="card">
+${recent.length ? recent.map(a=>`
+<div class="timeline-item">
+<div class="t-head">${ACTION_LABEL[a.type]} — ${a.scope==='bulk' ? escapeHtml(typeName(a.typeId))+' (all assets)' : escapeHtml(a.assetNumbers.join(', '))}</div>
+<div class="t-meta">${fmtDateTime(a.timestamp)} · logged by ${escapeHtml(a.loggedBy||'—')}</div>
+</div>`).join('') : '<div class="empty-state">No actions logged yet.</div>'}
+</div>
+`;
 }
-
-/* ============================= RENDER HUB ============================= */
-function renderCurrentView(){
-  const ws = document.getElementById('workspace');
-  const title = document.getElementById('current-view-title');
-  ws.innerHTML = '';
-  
-  title.innerText = STATE.route.replace('-',' ').toUpperCase();
-  
-  switch(STATE.route){
-    case 'dashboard': renderDashboard(ws); break;
-    case 'assets': renderAssetsView(ws); break;
-    case 'log-action': renderLogActionView(ws); break;
-    case 'scan-lookup': renderScanLookupView(ws); break;
-    case 'pm-schedule': renderPmScheduleView(ws); break;
-    case 'reports': renderReportsView(ws); break;
-    case 'settings': renderSettingsView(ws); break;
-    case 'asset-profile': renderAssetProfileView(ws); break;
-    case 'visitor-scan': renderVisitorScanView(ws); break;
-    default: ws.innerHTML = `<div>View not found.</div>`;
-  }
+function pmStatusFor(assetNumber){
+const sched = STATE.pmSchedules.find(s=>s.assetNumber===assetNumber);
+if(!sched || !sched.intervalDays) return {set:false, overdue:false};
+const lastPM = lastActionOfType(assetNumber,'pm');
+const asset = STATE.assets.find(a=>a.assetNumber===assetNumber);
+const baseline = lastPM ? lastPM.timestamp : (asset ? asset.purchaseDate : null);
+if(!baseline) return {set:true, overdue:false, noBaseline:true, intervalDays:sched.intervalDays};
+const next = new Date(baseline); next.setDate(next.getDate()+Number(sched.intervalDays));
+return {set:true, overdue: next < new Date(), nextDue: next, intervalDays:sched.intervalDays};
 }
-
-/* ============================= INTERFACE VIEWS ============================= */
-function renderDashboard(el){
-  const m = calculateMetrics();
-  let recentRows = '';
-  
-  const slice = [...STATE.actions].sort((a,b)=>b.timestamp-a.timestamp).slice(0,5);
-  slice.forEach(act => {
-    recentRows += `
-      <tr>
-        <td style="font-family:var(--mono); font-weight:600;">${escapeHtml(act.assetNumber)}</td>
-        <td>${escapeHtml(ACTION_LABEL[act.type])}</td>
-        <td>${escapeHtml(act.operator)}</td>
-        <td>${fmtDate(act.timestamp)}</td>
-        <td><span class="pill pill-${act.resultingStatus}">${STATUS_DEF[act.resultingStatus].label}</span></td>
-      </tr>
-    `;
-  });
-
-  el.innerHTML = `
-    <div class="stats-grid">
-      <div class="stat-card"><div class="stat-val" style="color:var(--navy);">${m.total}</div><div class="stat-lbl">Total assets</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--green);">${m.operational}</div><div class="stat-lbl">Operational</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--amber);">${m.intervention}</div><div class="stat-lbl">Requires intervention</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--red);">${m.failure}</div><div class="stat-lbl">Failure</div></div>
-      <div class="stat-card"><div class="stat-val" style="color:var(--steel);">${m.pmDue}</div><div class="stat-lbl">Overdue PM (critical)</div></div>
-    </div>
-    
-    <div class="card">
-      <h3 style="margin-bottom:16px;">Recent activity</h3>
-      ${slice.length === 0 ? '<div class="empty-state">No actions logged yet.</div>' : `
-        <table class="data-table">
-          <thead>
-            <tr><th>Asset</th><th>Action Type</th><th>Operator</th><th>Timestamp</th><th>Result Status</th></tr>
-          </thead>
-          <tbody>${recentRows}</tbody>
-        </table>
-      `}
-    </div>
-  `;
+/* ============================= ASSETS LIST ============================= */
+function renderAssets(){
+return `
+<div class="toolbar">
+<input class="field search-field" id="asset-search" placeholder="Search asset number, ID or type…" oninput="filterAssetGrid()">
+<select class="field" id="filter-type" onchange="filterAssetGrid()">
+<option value="">All types</option>
+${STATE.types.map(t=>`<option value="${t.id}">${escapeHtml(t.name)}</option>`).join('')}
+</select>
+<select class="field" id="filter-status" onchange="filterAssetGrid()">
+<option value="">All statuses</option>
+${Object.keys(STATUS_DEF).map(s=>`<option value="${s}">${STATUS_DEF[s].label}</option>`).join('')}
+</select>
+<div style="flex:1"></div>
+${STATE.role==='admin' ? `<button class="btn" onclick="openImportModal()">Import Excel</button>` : ''}
+<button class="btn" onclick="exportExcel()">Export Excel</button>
+<button class="btn" onclick="downloadLabelSheet(getFilteredAssets())">Download QR labels (PDF)</button>
+${STATE.role!=='vendor' ? `<button class="btn btn-primary" onclick="openAddAssetModal()">Add asset</button>` : ''}
+</div>
+<div class="grid-assets" id="asset-grid">${assetGridHtml(STATE.assets)}</div>
+`;
 }
-
-function renderAssetsView(el){
-  let rows = '';
-  STATE.assets.forEach(a => {
-    rows += `
-      <tr style="cursor:pointer;" onclick="navigateTo('asset-profile', {assetNumber: '${a.assetNumber}'})">
-        <td style="font-family:var(--mono); font-weight:600;">${escapeHtml(a.assetNumber)}</td>
-        <td>${escapeHtml(a.name)}</td>
-        <td>${escapeHtml(typeName(a.typeId))}</td>
-        <td>${escapeHtml(a.location)}</td>
-        <td><span class="pill pill-${a.status}">${STATUS_DEF[a.status].label}</span></td>
-      </tr>
-    `;
-  });
-
-  el.innerHTML = `
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
-      <h2 style="font-size:16px; font-weight:600;">All Monitored Assets</h2>
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-secondary" onclick="exportToExcel()">Export Excel</button>
-        <button class="btn btn-primary" onclick="openNewAssetModal()">+ Register Asset</button>
-      </div>
-    </div>
-    
-    <div class="card" style="padding:0; overflow:hidden;">
-      ${STATE.assets.length === 0 ? '<div style="padding:24px;"><div class="empty-state">No assets registered yet. Click Register Asset to start.</div></div>' : `
-        <table class="data-table">
-          <thead>
-            <tr><th>Asset #</th><th>Description Name</th><th>Type Category</th><th>Location</th><th>Current Status</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `}
-    </div>
-  `;
+function assetGridHtml(list){
+if(!list.length) return `<div class="empty-state" style="grid-column:1/-1"><h3>No assets yet</h3><p>Add one manually or import your Excel file.</p></div>`;
+return list.map(a=>{
+const st = STATUS_DEF[a.status] || STATUS_DEF.operational;
+return `
+<div class="asset-tag" style="--tag-color:var(--${st.color})" onclick="viewAssetProfile('${escapeHtml(a.assetNumber)}')">
+<div class="eyebrow"><span>${escapeHtml(typeName(a.typeId))}</span><span class="chip chip-${a.priority}">${PRIORITY_DEF[a.priority].label}</span></div>
+<div class="num">${escapeHtml(a.assetNumber)}</div>
+<div class="meta">${a.assetId ? 'Mfr ID: '+escapeHtml(a.assetId) : 'No manufacturer ID'}</div>
+<div class="rowline"><span class="pill pill-${a.status}">${st.label}</span></div>
+</div>`;
+}).join('');
 }
-
-function openNewAssetModal(){
-  const ws = document.getElementById('workspace');
-  let opts = '';
-  ASSET_TYPES.forEach(t => opts += `<option value="${t.id}">${t.name}</option>`);
-  
-  const div = document.createElement('div');
-  div.style = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; z-index:1000;';
-  div.id = 'asset-modal';
-  div.innerHTML = `
-    <div class="card" style="width:450px; margin:0; background:#FFF;">
-      <h3 style="margin-bottom:16px;">Register New Facility Asset</h3>
-      <div class="form-group">
-        <label class="form-label">Asset Identifier (Unique Number)</label>
-        <input type="text" id="m-num" class="form-input" placeholder="e.g. HVAC-04-CLUJ" style="text-transform:uppercase;">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Asset Name / Description</label>
-        <input type="text" id="m-name" class="form-input" placeholder="e.g. Daikin Chiller Enclosure B">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Category System Type</label>
-        <select id="m-type" class="form-select">${opts}</select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Facility Location Floor/Room</label>
-        <input type="text" id="m-loc" class="form-input" placeholder="e.g. Roof Level, Section West">
-      </div>
-      <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:24px;">
-        <button class="btn btn-secondary" onclick="document.getElementById('asset-modal').remove()">Cancel</button>
-        <button class="btn btn-primary" onclick="submitNewAsset()">Save Asset</button>
-      </div>
-    </div>
-  `;
-  ws.appendChild(div);
+function getFilteredAssets(){
+const searchEl = document.getElementById('asset-search');
+if(!searchEl) return STATE.assets;
+const q = (searchEl.value||'').toLowerCase();
+const t = document.getElementById('filter-type').value;
+const s = document.getElementById('filter-status').value;
+return STATE.assets.filter(a=>{
+if(t && a.typeId!==t) return false;
+if(s && a.status!==s) return false;
+if(q && !(a.assetNumber.toLowerCase().includes(q) || (a.assetId||'').toLowerCase().includes(q) || typeName(a.typeId).toLowerCase().includes(q))) return false;
+return true;
+});
 }
-
-async function submitNewAsset(){
-  let num = document.getElementById('m-num').value.trim().toUpperCase();
-  let name = document.getElementById('m-name').value.trim();
-  let typeId = document.getElementById('m-type').value;
-  let loc = document.getElementById('m-loc').value.trim();
-  
-  if(!num || !name || !loc){
-    alert('Please fill out all technical descriptor parameters.'); return;
-  }
-  if(STATE.assets.find(x => x.assetNumber === num)){
-    alert('An asset item with this matching unique code signature already exists.'); return;
-  }
-  
-  let item = {
-    assetNumber: num,
-    name: name,
-    typeId: typeId,
-    location: loc,
-    status: 'operational',
-    nextPmDate: Date.now() + (90 * 24 * 60 * 60 * 1000) 
-  };
-  
-  STATE.assets.push(item);
-  await pushAssetToDatabase(item);
-  document.getElementById('asset-modal').remove();
-  renderAssetsView(document.getElementById('workspace'));
+function filterAssetGrid(){
+document.getElementById('asset-grid').innerHTML = assetGridHtml(getFilteredAssets());
 }
-
-function renderLogActionView(el){
-  let assetOpts = '<option value="">-- Choose Asset Parameter Target --</option>';
-  STATE.assets.forEach(a => {
-    assetOpts += `<option value="${a.assetNumber}" ${STATE.selectedAsset === a.assetNumber ? 'selected' : ''}>${a.assetNumber} - ${a.name}</option>`;
-  });
-
-  el.innerHTML = `
-    <div class="split-panel">
-      <div class="card">
-        <h3 style="margin-bottom:16px;">Technical Operations Input</h3>
-        
-        <div class="form-group">
-          <label class="form-label">Target Asset Identifier</label>
-          <select id="l-asset" class="form-select" onchange="updateActionContext()">${assetOpts}</select>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Operation Workflow Type</label>
-          <select id="l-type" class="form-select" onchange="updateActionContext()">
-            <option value="check">Check / Routine Patrol</option>
-            <option value="pm">Preventive Maintenance</option>
-            <option value="intervention">Breakdown Intervention</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Operator Field Technician Name</label>
-          <input type="text" id="l-user" class="form-input" value="${STATE.role === 'Vendor / handyman' ? 'External Vendor Partner' : 'Internal Staff Engine'}" placeholder="Enter identity tag">
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Resulting Physical Operation Status</label>
-          <select id="l-status" class="form-select">
-            <option value="operational">Operational (Normal)</option>
-            <option value="intervention">Requires intervention (Degraded)</option>
-            <option value="failure">Failure (Offline)</option>
-            <option value="pm-due">Overdue PM (Suspended)</option>
-          </select>
-        </div>
-        
-        <div class="form-group">
-          <label class="form-label">Engineering Log Notes / Diagnostics</label>
-          <textarea id="l-notes" class="form-textarea" rows="3" placeholder="Describe component wear, fluid configurations or tracking anomalies..."></textarea>
-        </div>
-        
-        <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="submitActionLog()">Commit Technical Activity Log</button>
-      </div>
-      
-      <div class="card" id="checklist-panel">
-        <h3 style="margin-bottom:16px;">System Verification Protocol</h3>
-        <div class="empty-state">Select an asset target code definition to overlay dynamic checking steps.</div>
-      </div>
-    </div>
-  `;
-  
-  if(STATE.selectedAsset) {
-    updateActionContext();
-    STATE.selectedAsset = null; 
-  }
+/* ============================= ADD / EDIT ASSET MODAL ============================= */
+function openAddAssetModal(existing){
+const isEdit = !!existing;
+const body = `
+<div class="form-grid">
+<div class="form-row"><label class="flabel">Asset Number *</label><input class="field" id="m-num" value="${isEdit?escapeHtml(existing.assetNumber):''}" ${isEdit?'disabled':''}></div>
+<div class="form-row"><label class="flabel">Asset ID (manufacturer)</label><input class="field" id="m-id" value="${isEdit?escapeHtml(existing.assetId||''):''}"></div>
+<div class="form-row"><label class="flabel">Type *</label>
+<select class="field" id="m-type">${STATE.types.map(t=>`<option value="${t.id}" ${isEdit&&existing.typeId===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select>
+</div>
+<div class="form-row"><label class="flabel">Priority</label>
+<select class="field" id="m-priority">
+${Object.keys(PRIORITY_DEF).map(p=>`<option value="${p}" ${isEdit&&existing.priority===p?'selected':(!isEdit&&p==='medium'?'selected':'')}>${PRIORITY_DEF[p].label}</option>`).join('')}
+</select>
+</div>
+<div class="form-row"><label class="flabel">Purchase date</label><input type="date" class="field" id="m-date" value="${isEdit?(existing.purchaseDate||''):''}"></div>
+<div class="form-row"><label class="flabel">Price</label><input class="field" id="m-price" type="number" step="0.01" value="${isEdit?(existing.price||''):''}"></div>
+</div>
+`;
+openModal(isEdit?'Edit asset':'Add asset', '', body, `
+<button class="btn" onclick="closeModal()">Cancel</button>
+<button class="btn btn-primary" onclick="saveAssetFromModal(${isEdit?`'${escapeHtml(existing.assetNumber)}'`:'null'})">Save</button>
+`);
 }
+async function saveAssetFromModal(editingNumber){
+  const num = document.getElementById('m-num').value.trim();
+  const id = document.getElementById('m-id').value.trim();
+  const typeId = document.getElementById('m-type').value;
+  const priority = document.getElementById('m-priority').value;
+  const date = document.getElementById('m-date').value;
+  const price = document.getElementById('m-price').value;
 
-function updateActionContext(){
-  let num = document.getElementById('l-asset').value;
-  let actType = document.getElementById('l-type').value;
-  let panel = document.getElementById('checklist-panel');
-  
-  if(!num){
-    panel.innerHTML = `<h3 style="margin-bottom:16px;">System Verification Protocol</h3><div class="empty-state">Select an asset target code definition to overlay dynamic checking steps.</div>`;
+  if(!num){ toast('Asset Number is required'); return; }
+  if(!editingNumber && STATE.assets.some(a=>a.assetNumber===num)){
+    toast('That Asset Number already exists');
     return;
   }
-  
-  let a = STATE.assets.find(x => x.assetNumber === num);
-  let list = CHECKLISTS[a.typeId][actType] || [];
-  
-  let itemsHtml = '';
-  list.forEach((item, index) => {
-    itemsHtml += `
-      <div class="check-item">
-        <input type="checkbox" id="chk-${index}">
-        <label for="chk-${index}" class="check-label">${escapeHtml(item)}</label>
-      </div>
-    `;
-  });
-  
-  panel.innerHTML = `
-    <h3 style="margin-bottom:4px;">System Verification Protocol</h3>
-    <div style="font-size:12px; color:var(--ink-soft); margin-bottom:16px;">Dynamic steps for structure: <strong style="font-family:var(--mono);">${a.typeId.toUpperCase()}</strong></div>
-    ${list.length === 0 ? '<div class="empty-state">No specific parameters established for this type. Check general safety boundaries.</div>' : itemsHtml}
-  `;
-}
 
-async function submitActionLog(){
-  let num = document.getElementById('l-asset').value;
-  let type = document.getElementById('l-type').value;
-  let user = document.getElementById('l-user').value.trim();
-  let resStatus = document.getElementById('l-status').value;
-  let notes = document.getElementById('l-notes').value.trim();
-  
-  if(!num || !user){
-    alert('Asset target and operational identity parameters cannot be blank.');
-    return;
-  }
-  
-  let a = STATE.assets.find(x => x.assetNumber === num);
-  let list = CHECKLISTS[a.typeId][type] || [];
-  let checklistResults = [];
-  
-  for(let i=0; i<list.length; i++){
-    let chk = document.getElementById(`chk-${i}`);
-    checklistResults.push({
-      text: list[i],
-      checked: chk ? chk.checked : false
+  const previousAssets = JSON.parse(JSON.stringify(STATE.assets));
+
+  if(editingNumber){
+    const asset = STATE.assets.find(a=>a.assetNumber===editingNumber);
+    asset.assetId = id;
+    asset.typeId = typeId;
+    asset.priority = priority;
+    asset.purchaseDate = date;
+    asset.price = price ? parseFloat(price) : undefined;
+  }else{
+    STATE.assets.push({
+      assetNumber:num,
+      assetId:id,
+      typeId,
+      priority,
+      purchaseDate:date,
+      price:price ? parseFloat(price) : undefined,
+      status:'operational',
+      createdAt:new Date().toISOString()
     });
   }
-  
-  let actionItem = {
-    id: crypto.randomUUID ? crypto.randomUUID() : 'act-' + Date.now(),
-    assetNumber: num,
-    type: type,
-    operator: user,
-    resultingStatus: resStatus,
-    notes: notes,
-    timestamp: Date.now(),
-    checklist: checklistResults
+
+  const saved = await safeSet('assets', STATE.assets);
+  if(!saved){
+    STATE.assets = previousAssets;
+    return;
+  }
+
+  closeModal();
+  toast('Asset saved to the cloud');
+  if(editingNumber){ viewAssetProfile(editingNumber); }
+  else{ navigate('assets'); }
+}
+/* ============================= ASSET PROFILE ============================= */
+function viewAssetProfile(assetNumber){
+navigate('asset-profile', {assetNumber});
+}
+function assetProfileHtml(assetNumber){
+const a = STATE.assets.find(a=>a.assetNumber===assetNumber);
+if(!a) return `<div class="empty-state">Asset not found.</div>`;
+const st = STATUS_DEF[a.status];
+const history = actionsForAsset(assetNumber);
+return `
+<button class="btn btn-sm" style="margin-bottom:14px" onclick="navigate('assets')">← Back to assets</button>
+<div class="card" style="margin-bottom:18px;">
+<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:14px;">
+<div>
+<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft)">${escapeHtml(typeName(a.typeId))}</div>
+<div style="font-family:var(--mono);font-size:22px;font-weight:600;margin:2px 0 6px;">${escapeHtml(a.assetNumber)}</div>
+<div style="font-size:12.5px;color:var(--ink-soft)">Mfr ID: ${escapeHtml(a.assetId||'—')} · Purchased: ${fmtDate(a.purchaseDate)} · Price: ${a.price?a.price:'—'}</div>
+<div style="margin-top:10px;display:flex;gap:8px;align-items:center;">
+<span class="pill pill-${a.status}">${st.label}</span>
+<span class="chip chip-${a.priority}">${PRIORITY_DEF[a.priority].label} priority</span>
+</div>
+</div>
+<div class="qr-box"><div id="qr-canvas"></div></div>
+</div>
+<div class="modal-actions" style="justify-content:flex-start;border-top:none;padding-top:14px;">
+${STATE.role!=='vendor' && STATE.role!=='visitor' ? `<button class="btn" onclick="openAddAssetModal(getAsset('${escapeHtml(assetNumber)}'))">Edit details</button>` : ''}
+<button class="btn btn-amber" onclick="openChangeStatusModal('${escapeHtml(assetNumber)}')">Change status</button>
+<button class="btn" onclick="navigate('log-action',{logPrefill:{assetNumber:'${escapeHtml(assetNumber)}'}})">Log an action</button>
+<button class="btn" onclick="downloadAssetPDF('${escapeHtml(assetNumber)}')">Download report (PDF)</button>
+<button class="btn" onclick="printLabel('${escapeHtml(assetNumber)}')">Download QR label (PDF)</button>
+</div>
+</div>
+<h3 style="margin-bottom:10px;">Report — full history</h3>
+<div class="card">
+${history.length ? history.map(h=>timelineItemHtml(h)).join('') : '<div class="empty-state">No actions logged for this asset yet.</div>'}
+</div>
+`;
+}
+function timelineItemHtml(h){
+let doc = '';
+if(h.docRef){ doc = `<div class="t-body"><a href="#" onclick="downloadDoc('${h.id}');return false;">�� ${escapeHtml(h.docRef.filename)}</a></div>`; }
+if(h.docLink){ doc += `<div class="t-body"><a href="${escapeHtml(h.docLink)}" target="_blank" rel="noopener">�� Linked document</a></div>`; }
+let checklistHtml='';
+if(h.checklist && h.checklist.length){
+const done = h.checklist.filter(c=>c.checked).length;
+checklistHtml = `<div class="t-body">${done}/${h.checklist.length} checklist items completed</div>`;
+}
+return `
+<div class="timeline-item">
+<div class="t-head">${ACTION_LABEL[h.type]}${h.resultingStatus ? ' → '+STATUS_DEF[h.resultingStatus].label : ''}</div>
+<div class="t-meta">${fmtDateTime(h.timestamp)} · ${h.scope==='bulk'?'bulk action on '+escapeHtml(typeName(h.typeId)):'single asset'} · logged by ${escapeHtml(h.loggedBy||'—')}</div>
+${h.description ? `<div class="t-body">${escapeHtml(h.description)}</div>` : ''}
+${h.notes ? `<div class="t-body">${escapeHtml(h.notes)}</div>` : ''}
+${checklistHtml}
+${doc}
+</div>`;
+}
+function openChangeStatusModal(assetNumber){
+const a = getAsset(assetNumber);
+const body = `
+<div class="form-row">
+<label class="flabel">New status</label>
+<select class="field" id="cs-status" onchange="renderStatusFields()">
+<option value="operational" ${a.status==='operational'?'selected':''}>Operational</option>
+<option value="requires_intervention" ${a.status==='requires_intervention'?'selected':''}>Requires intervention (still usable)</option>
+<option value="failure" ${a.status==='failure'?'selected':''}>Failure (not usable)</option>
+<option value="decommissioned" ${a.status==='decommissioned'?'selected':''}>Decommissioned</option>
+</select>
+</div>
+<div id="cs-fields"></div>
+`;
+openModal('Change status', 'Current status: '+STATUS_DEF[a.status].label, body, `
+<button class="btn" onclick="closeModal()">Cancel</button>
+<button class="btn btn-primary" onclick="submitStatusChange('${escapeHtml(assetNumber)}')">Save</button>
+`);
+renderStatusFields();
+}
+function renderStatusFields(){
+const val = document.getElementById('cs-status').value;
+const el = document.getElementById('cs-fields');
+if(val==='requires_intervention' || val==='failure'){
+el.innerHTML = `<div class="form-row"><label class="flabel">What's wrong? *</label><textarea class="field" id="cs-desc" rows="3" placeholder="Required"></textarea></div>`;
+}else if(val==='operational'){
+el.innerHTML = `<div class="form-row"><label class="flabel">Resolution notes</label><textarea class="field" id="cs-desc" rows="2" placeholder="What was fixed (optional)"></textarea></div>`;
+}else{
+el.innerHTML = `<div class="form-row"><label class="flabel">Notes</label><textarea class="field" id="cs-desc" rows="2" placeholder="Optional"></textarea></div>`;
+}
+}
+async function submitStatusChange(assetNumber){
+  const newStatus = document.getElementById('cs-status').value;
+  const descEl = document.getElementById('cs-desc');
+  const text = descEl ? descEl.value.trim() : '';
+
+  if((newStatus==='requires_intervention' || newStatus==='failure') && !text){
+    toast("Add a description of what's wrong");
+    return;
+  }
+
+  const previousAssets = JSON.parse(JSON.stringify(STATE.assets));
+  const previousActions = JSON.parse(JSON.stringify(STATE.actions));
+  const asset = getAsset(assetNumber);
+  const prevStatus = asset.status;
+  asset.status = newStatus;
+
+  const action = {
+    id:uid(),
+    type:'intervention',
+    scope:'single',
+    assetNumbers:[assetNumber],
+    resultingStatus:newStatus,
+    description:(newStatus==='requires_intervention'||newStatus==='failure') ? text : undefined,
+    notes:(newStatus==='operational'||newStatus==='decommissioned')
+      ? (text || ('Status changed from '+STATUS_DEF[prevStatus].label+' to '+STATUS_DEF[newStatus].label))
+      : undefined,
+    loggedBy:currentUserLabel(),
+    timestamp:new Date().toISOString()
   };
-  
-  STATE.actions.push(actionItem);
-  await pushActionToDatabase(actionItem);
-  
-  a.status = resStatus;
-  if(type === 'pm' && resStatus === 'operational'){
-    a.nextPmDate = Date.now() + (90 * 24 * 60 * 60 * 1000);
-  }
-  await pushAssetToDatabase(a);
-  
-  alert('Technical operations file successfully executed & pushed to cloud storage.');
-  navigateTo('dashboard');
-}
 
-function renderScanLookupView(el){
-  el.innerHTML = `
-    <div class="card" style="max-width:500px; margin: 0 auto 24px auto;">
-      <h3 style="margin-bottom:12px;">Identifier Scan simulation</h3>
-      <div class="form-group">
-        <label class="form-label">Scan / Input Serial Label Sequence</label>
-        <div style="display:flex; gap:8px;">
-          <input type="text" id="s-input" class="form-input" placeholder="ASSET:HVAC-01-CLUJ" style="text-transform:uppercase;">
-          <button class="btn btn-primary" onclick="executeLookup()">Query</button>
-        </div>
-      </div>
-    </div>
-    <div id="lookup-result-target"></div>
-  `;
-}
+  STATE.actions.push(action);
+  const [assetsSaved, actionsSaved] = await Promise.all([
+    safeSet('assets', STATE.assets),
+    safeSet('actions', STATE.actions)
+  ]);
 
-function executeLookup(){
-  let val = document.getElementById('s-input').value.trim().replace(/^ASSET:/i,'');
-  let target = document.getElementById('lookup-result-target');
-  
-  if(!val){
-    target.innerHTML = '';
+  if(!assetsSaved || !actionsSaved){
+    STATE.assets = previousAssets;
+    STATE.actions = previousActions;
+    await loadCloudState(false);
+    render();
     return;
   }
-  
-  let a = STATE.assets.find(x => x.assetNumber.toLowerCase() === val.toLowerCase());
-  if(!a){
-    target.innerHTML = `<div class="card" style="max-width:500px; margin:0 auto; text-align:center; color:var(--red);">No tracking record discovered inside active system infrastructure logs for index sequence.</div>`;
-    return;
+
+  closeModal();
+  toast('Status updated in the cloud');
+  viewAssetProfile(assetNumber);
+}
+function currentUserLabel(){
+return STATE.role.charAt(0).toUpperCase()+STATE.role.slice(1);
+}
+/* ============================= LOG ACTION ============================= */
+function renderLogAction(){
+const pre = STATE.logPrefill;
+return `
+<div class="card" style="max-width:640px;">
+<div class="form-row">
+<label class="flabel">Scope</label>
+<select class="field" id="la-scope" onchange="renderLogActionFields()">
+<option value="single" ${pre&&pre.assetNumber?'selected':''}>Single asset</option>
+<option value="bulk">Entire asset type (all current assets of that type)</option>
+</select>
+</div>
+<div id="la-scope-fields"></div>
+<div class="form-row">
+<label class="flabel">Action type</label>
+<select class="field" id="la-type" onchange="renderChecklistFields()">
+<option value="check">Check</option>
+<option value="pm">Preventive maintenance</option>
+<option value="intervention">Intervention</option>
+</select>
+</div>
+<div id="la-checklist"></div>
+<div id="la-intervention" style="display:none;">
+<div class="form-row"><label class="flabel">What's wrong?</label><textarea class="field" id="la-desc" rows="3"></textarea></div>
+<div class="form-row"><label class="flabel">Resulting status</label>
+<select class="field" id="la-result-status">
+<option value="requires_intervention">Requires intervention (still usable)</option>
+<option value="failure">Failure (not usable)</option>
+</select>
+</div>
+</div>
+<div class="form-row"><label class="flabel">Notes (optional)</label><textarea class="field" id="la-notes" rows="2"></textarea></div>
+<div class="form-row"><label class="flabel">Upload document (max 1.5MB)</label><input type="file" class="field" id="la-file"></div>
+<div class="form-row"><label class="flabel">Or paste a document link (SharePoint/Drive)</label><input class="field" id="la-link" placeholder="https://…"></div>
+<div class="modal-actions" style="border-top:none;">
+<button class="btn btn-primary" onclick="submitLogAction()">Save action</button>
+</div>
+</div>
+`;
+}
+function renderLogActionFields(){
+const scope = document.getElementById('la-scope').value;
+const el = document.getElementById('la-scope-fields');
+const pre = STATE.logPrefill;
+if(scope==='single'){
+const preAsset = pre && pre.assetNumber ? getAsset(pre.assetNumber) : null;
+const preType = preAsset ? preAsset.typeId : '';
+el.innerHTML = `
+<div class="form-row"><label class="flabel">Filter by type (optional, to narrow the list)</label>
+<select class="field" id="la-type-filter" onchange="renderSingleAssetOptions()">
+<option value="">All types</option>
+${STATE.types.map(t=>`<option value="${t.id}" ${preType===t.id?'selected':''}>${escapeHtml(t.name)} (${assetsOfType(t.id).length})</option>`).join('')}
+</select>
+</div>
+<div class="form-row"><label class="flabel">Asset</label>
+<select class="field" id="la-asset" onchange="renderChecklistFields()"></select>
+</div>`;
+renderSingleAssetOptions();
+}else{
+el.innerHTML = `<div class="form-row"><label class="flabel">Asset type</label>
+<select class="field" id="la-typeid" onchange="renderChecklistFields()">
+${STATE.types.map(t=>`<option value="${t.id}">${escapeHtml(t.name)} (${assetsOfType(t.id).length} assets)</option>`).join('')}
+</select></div>`;
+renderChecklistFields();
+}
+}
+function renderSingleAssetOptions(){
+const filterEl = document.getElementById('la-type-filter');
+const filterType = filterEl ? filterEl.value : '';
+const assetSel = document.getElementById('la-asset');
+const pre = STATE.logPrefill;
+const currentVal = assetSel ? assetSel.value : null;
+const list = STATE.assets.filter(a => !filterType || a.typeId===filterType);
+assetSel.innerHTML = list.length
+? list.map(a=>`<option value="${escapeHtml(a.assetNumber)}">${escapeHtml(a.assetNumber)} — ${escapeHtml(typeName(a.typeId))}</option>`).join('')
+: '<option value="">No assets of this type</option>';
+if(currentVal && list.some(a=>a.assetNumber===currentVal)){
+assetSel.value = currentVal;
+}else if(pre && pre.assetNumber && list.some(a=>a.assetNumber===pre.assetNumber)){
+assetSel.value = pre.assetNumber;
+}
+renderChecklistFields();
+}
+function renderChecklistFields(){
+const actionType = document.getElementById('la-type').value;
+const interventionEl = document.getElementById('la-intervention');
+const checklistEl = document.getElementById('la-checklist');
+interventionEl.style.display = actionType==='intervention' ? 'block' : 'none';
+if(actionType==='intervention'){ checklistEl.innerHTML=''; return; }
+const scope = document.getElementById('la-scope').value;
+let typeId;
+if(scope==='single'){
+const assetEl = document.getElementById('la-asset');
+const a = assetEl ? STATE.assets.find(x=>x.assetNumber===assetEl.value) : null;
+typeId = a ? a.typeId : null;
+}else{
+const typeEl = document.getElementById('la-typeid');
+typeId = typeEl ? typeEl.value : null;
+}
+const type = STATE.types.find(t=>t.id===typeId);
+const items = type ? (actionType==='check'?type.check:type.pm) : [];
+if(!items || !items.length){ checklistEl.innerHTML='<p style="color:var(--ink-soft);font-size:12.5px;margin:8px 0;">No checklist template for this type/action yet.</p>'; return; }
+checklistEl.innerHTML = `<label class="flabel" style="margin-top:10px;display:block;">Checklist</label><div class="card">${items.map((it,i)=>`
+<div class="checklist-item"><input type="checkbox" id="cl-${i}"><label for="cl-${i}">${escapeHtml(it)}</label></div>`).join('')}</div>`;
+}
+async function submitLogAction(){
+  const scope = document.getElementById('la-scope').value;
+  const actionType = document.getElementById('la-type').value;
+  let assetNumbers = [];
+  let typeId = null;
+
+  if(scope==='single'){
+    const assetEl = document.getElementById('la-asset');
+    if(!assetEl || !assetEl.value){ toast('Add an asset first'); return; }
+    assetNumbers = [assetEl.value];
+  }else{
+    typeId = document.getElementById('la-typeid').value;
+    assetNumbers = assetsOfType(typeId).map(a=>a.assetNumber);
+    if(!assetNumbers.length){ toast('No assets of that type yet'); return; }
   }
-  
-  navigateTo('asset-profile', {assetNumber: a.assetNumber});
-}
 
-function renderPmScheduleView(el){
-  let rows = '';
-  let sorted = [...STATE.assets].sort((a,b) => a.nextPmDate - b.nextPmDate);
-  
-  sorted.forEach(a => {
-    let daysLeft = Math.ceil((a.nextPmDate - Date.now()) / (1000*60*60*24));
-    let statusContext = '';
-    if(daysLeft <= 0) statusContext = '<span style="color:var(--red); font-weight:bold;">CRITICAL OVERDUE</span>';
-    else if(daysLeft <= 14) statusContext = '<span style="color:var(--amber); font-weight:bold;">URGENT DUE</span>';
-    else statusContext = `<span style="color:var(--green);">${daysLeft} days remaining</span>`;
-    
-    rows += `
-      <tr>
-        <td style="font-family:var(--mono); font-weight:600;">${escapeHtml(a.assetNumber)}</td>
-        <td>${escapeHtml(a.name)}</td>
-        <td>${fmtDate(a.nextPmDate)}</td>
-        <td>${statusContext}</td>
-        <td><button class="btn btn-secondary" style="padding:4px 8px; font-size:11px;" onclick="navigateTo('log-action',{assetNumber:'${a.assetNumber}'})">Perform PM</button></td>
-      </tr>
-    `;
-  });
+  const notes = document.getElementById('la-notes').value.trim();
+  const link = document.getElementById('la-link').value.trim();
+  const fileInput = document.getElementById('la-file');
+  const previousAssets = JSON.parse(JSON.stringify(STATE.assets));
+  const previousActions = JSON.parse(JSON.stringify(STATE.actions));
 
-  el.innerHTML = `
-    <div class="card" style="padding:0; overflow:hidden;">
-      ${STATE.assets.length === 0 ? '<div style="padding:24px;"><div class="empty-state">No assets managed. PM tracking matrix requires structural definitions.</div></div>' : `
-        <table class="data-table">
-          <thead>
-            <tr><th>Asset #</th><th>Description Label</th><th>Target Deadline Date</th><th>Chronology Status</th><th>Action</th></tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-      `}
-    </div>
-  `;
-}
+  const action = {
+    id:uid(),
+    type:actionType,
+    scope,
+    assetNumbers,
+    typeId:scope==='bulk' ? typeId : undefined,
+    notes:notes || undefined,
+    docLink:link || undefined,
+    loggedBy:currentUserLabel(),
+    timestamp:new Date().toISOString()
+  };
 
-function renderReportsView(el){
-  const m = calculateMetrics();
-  el.innerHTML = `
-    <div class="split-panel">
-      <div class="card">
-        <h3 style="margin-bottom:16px;">Operational Summary Matrix</h3>
-        <div style="height:200px; display:flex; align-items:center; justify-content:center; background:var(--paper); border-radius:6px;">
-          <div style="text-align:center;">
-            <div style="font-size:24px; font-weight:bold; color:var(--navy); font-family:var(--mono);">${((m.operational / (m.total || 1)) * 100).toFixed(1)}%</div>
-            <div style="font-size:12px; color:var(--ink-soft);">Global Infrastructure Health Index</div>
-          </div>
-        </div>
-        <div style="margin-top:16px; font-size:13px; display:flex; flex-direction:column; gap:8px;">
-          <div style="display:flex; justify-content:between;"><span>Operational uptime:</span><strong>${m.operational} assets</strong></div>
-          <div style="display:flex; justify-content:between;"><span>Degraded state:</span><strong>${m.intervention} units</strong></div>
-          <div style="display:flex; justify-content:between;"><span>Complete Outage tracking:</span><strong style="color:var(--red);">${m.failure} down</strong></div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <h3 style="margin-bottom:16px;">Historical Action Statistics</h3>
-        <div style="font-size:13px; display:flex; flex-direction:column; gap:12px; padding:8px 0;">
-          <div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Patrol Parameters Checks:</span><strong>${STATE.actions.filter(x=>x.type==='check').length} logged</strong></div>
-            <div style="background:var(--paper); height:6px; border-radius:3px;"><div style="background:var(--steel); height:6px; border-radius:3px; width:${(STATE.actions.filter(x=>x.type==='check').length / (STATE.actions.length || 1))*100}%"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Preventive Cycles:</span><strong>${STATE.actions.filter(x=>x.type==='pm').length} logged</strong></div>
-            <div style="background:var(--paper); height:6px; border-radius:3px;"><div style="background:var(--green); height:6px; border-radius:3px; width:${(STATE.actions.filter(x=>x.type==='pm').length / (STATE.actions.length || 1))*100}%"></div></div>
-          </div>
-          <div>
-            <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>Emergency Interventions:</span><strong>${STATE.actions.filter(x=>x.type==='intervention').length} logged</strong></div>
-            <div style="background:var(--paper); height:6px; border-radius:3px;"><div style="background:var(--red); height:6px; border-radius:3px; width:${(STATE.actions.filter(x=>x.type==='intervention').length / (STATE.actions.length || 1))*100}%"></div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderSettingsView(el){
-  el.innerHTML = `
-    <div class="card" style="max-width:600px;">
-      <h3 style="margin-bottom:16px;">System Maintenance & Initialization</h3>
-      <p style="font-size:13.5px; color:var(--ink-soft); margin-bottom:16px; line-height:1.5;">Configure bulk asset tracking metrics, print industrial labels sheets, or inject mock parameters for demonstration testing.</p>
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        <div>
-          <button class="btn btn-secondary" onclick="triggerPrintLabelSheet()">Print Infrastructure Label Matrix (PDF)</button>
-        </div>
-        <div style="border-top:1px solid var(--line); padding-top:16px; margin-top:8px;">
-          <h4 style="font-size:13px; margin-bottom:8px; color:var(--red);">Danger Management Zone</h4>
-          <button class="btn btn-danger" onclick="wipeLocalSystemMemory()">Clear Local Workspace Memory</button>
-        </div>
-      </div>
-    </div>
-  `;
-}
-
-function renderAssetProfileView(el){
-  let a = STATE.assets.find(x => x.assetNumber === STATE.selectedAsset);
-  if(!a){
-    el.innerHTML = `<div class="empty-state">Asset profiles view error code. Discovered structural data conflict.</div>`;
-    return;
-  }
-  
-  let hist = actionsForAsset(a.assetNumber);
-  let logRows = '';
-  
-  hist.forEach(h => {
-    let chkSummary = '';
-    if(h.checklist && h.checklist.length > 0){
-      let pass = h.checklist.filter(c => c.checked).length;
-      chkSummary = `<div style="font-size:11px; color:var(--ink-soft); margin-top:4px;">Protocol: ${pass}/${h.checklist.length} completed</div>`;
+  if(actionType!=='intervention'){
+    const checklistNodes = document.querySelectorAll('[id^="cl-"]');
+    if(checklistNodes.length){
+      const selectedTypeId = scope==='single'
+        ? STATE.assets.find(a=>a.assetNumber===assetNumbers[0]).typeId
+        : typeId;
+      const type = STATE.types.find(t=>t.id===selectedTypeId);
+      const items = actionType==='check' ? type.check : type.pm;
+      action.checklist = items.map((item, index)=>({
+        item,
+        checked:document.getElementById('cl-'+index).checked
+      }));
     }
-    
-    logRows += `
-      <div style="padding:16px 0; border-bottom:1px solid var(--line);">
-        <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:13.5px;">
-          <strong>${escapeHtml(ACTION_LABEL[h.type])}</strong>
-          <span class="pill pill-${h.resultingStatus}">${STATUS_DEF[h.resultingStatus].label}</span>
-        </div>
-        <div style="font-size:12px; color:var(--ink-soft);">Executed by ${escapeHtml(h.operator)} on ${fmtDate(h.timestamp)}</div>
-        ${h.notes ? `<div style="font-size:12.5px; background:var(--paper); padding:8px; border-radius:4px; margin-top:6px; font-style:italic;">${escapeHtml(h.notes)}</div>` : ''}
-        ${chkSummary}
-      </div>
-    `;
-  });
+  }else{
+    action.description = document.getElementById('la-desc').value.trim();
+    action.resultingStatus = document.getElementById('la-result-status').value;
+    assetNumbers.forEach(num=>{
+      const asset = STATE.assets.find(a=>a.assetNumber===num);
+      if(asset) asset.status = action.resultingStatus;
+    });
+  }
 
-  el.innerHTML = `
-    <div style="margin-bottom:16px;"><button class="btn btn-secondary" onclick="navigateTo('${STATE.role==='Vendor / handyman'?'dashboard':'assets'}')">&larr; Back to registry</button></div>
-    
-    <div class="split-panel">
-      <div>
-        <div class="card">
-          <div style="display:flex; justify-content:between; align-items:flex-start; margin-bottom:16px;">
-            <div>
-              <div style="font-size:12px; font-family:var(--mono); color:var(--ink-faint); margin-bottom:2px;">REGISTRY SIGNATURE</div>
-              <h2 style="font-size:22px; font-family:var(--mono); font-weight:700;">${escapeHtml(a.assetNumber)}</h2>
-            </div>
-            <span class="pill pill-${a.status}">${STATUS_DEF[a.status].label}</span>
-          </div>
-          
-          <div style="font-size:14px; display:flex; flex-direction:column; gap:10px; border-top:1px solid var(--line); padding-top:16px;">
-            <div><span style="color:var(--ink-soft); width:120px; display:inline-block;">Description:</span><strong>${escapeHtml(a.name)}</strong></div>
-            <div><span style="color:var(--ink-soft); width:120px; display:inline-block;">Category Class:</span><strong>${escapeHtml(typeName(a.typeId))}</strong></div>
-            <div><span style="color:var(--ink-soft); width:120px; display:inline-block;">Location Zone:</span><strong>${escapeHtml(a.location)}</strong></div>
-            <div><span style="color:var(--ink-soft); width:120px; display:inline-block;">Next PM Target:</span><strong>${fmtDate(a.nextPmDate)}</strong></div>
-          </div>
-          
-          <div style="margin-top:24px; display:flex; gap:8px;">
-            <button class="btn btn-primary" onclick="navigateTo('log-action', {assetNumber:'${a.assetNumber}'})">Log Field Action</button>
-            <button class="btn btn-secondary" onclick="printSingleLabel('${a.assetNumber}')">Print QR Identifier</button>
-          </div>
-        </div>
-        
-        <div class="card" style="text-align:center;">
-          <h4 style="font-size:13px; margin-bottom:12px;">Live Routing QR Target Blueprint</h4>
-          <div class="qr-holder" id="qr-canvas"></div>
-          <div style="font-size:11px; color:var(--ink-faint); margin-top:8px; font-family:var(--mono);">ASSET:${a.assetNumber}</div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <h3 style="margin-bottom:16px;">Operational Life-cycle Logs</h3>
-        ${hist.length === 0 ? '<div class="empty-state">No operations records logged for this hardware definition sequence.</div>' : `<div style="max-height:500px; overflow-y:auto; padding-right:8px;">${logRows}</div>`}
-      </div>
-    </div>
-  `;
-  
-  setTimeout(() => {
-    const qrBox = document.getElementById('qr-canvas');
-    if(qrBox && window.QRCode) {
-      qrBox.innerHTML = '';
-      new QRCode(qrBox, { text: 'ASSET:' + a.assetNumber, width: 110, height: 110 });
-    }
-  }, 50);
-}
-
-function renderVisitorScanView(el){
-  el.innerHTML = `
-    <div style="max-width:480px; margin:40px auto; padding:20px;">
-      <div style="text-align:center; margin-bottom:32px;">
-        <div style="font-size:11px; text-transform:uppercase; color:var(--amber); font-weight:700; letter-spacing:1px;">CLUJ FACILITY PORTAL</div>
-        <h2 style="font-size:24px; font-weight:700; margin-top:4px;">Public Infrastructure Check</h2>
-      </div>
-      
-      <div class="card">
-        <div class="form-group">
-          <label class="form-label">Scan Barcode / Input Identifier Number</label>
-          <input type="text" id="v-scan-input" class="form-input" placeholder="e.g. HVAC-01-CLUJ" style="text-transform:uppercase; font-family:var(--mono); text-align:center; font-size:16px; padding:12px;">
-        </div>
-        <button class="btn btn-primary" style="width:100%; padding:12px;" onclick="visitorScan()">Query Maintenance File</button>
-      </div>
-      
-      <div id="v-result"></div>
-    </div>
-  `;
-}
-
-function visitorScan(){
-  let val = document.getElementById('v-scan-input').value.trim().replace(/^ASSET:/i,'');
-  const a = STATE.assets.find(x => x.assetNumber.toLowerCase() === val.toLowerCase());
-  const el = document.getElementById('v-result');
-  if(!a){ el.innerHTML = `<div class="empty-state">No verified system match discovered. Contact facility engineering desk.</div>`; return; }
-  const st = STATUS_DEF[a.status];
-  const last = actionsForAsset(a.assetNumber)[0];
-  el.innerHTML = `
-    <div class="card" style="margin-top:16px;">
-      <div style="font-family:var(--mono);font-weight:600;font-size:16px; margin-bottom:4px;">${escapeHtml(a.assetNumber)}</div>
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:12px;">${escapeHtml(typeName(a.typeId))}</div>
-      <div><span class="pill pill-${a.status}">${st.label}</span></div>
-      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:16px; border-top:1px solid var(--line); padding-top:12px;">
-        ${last ? 'Last official engineering patrol log validation was run on <strong>' + fmtDate(last.timestamp) + '</strong> by ' + escapeHtml(last.operator) : 'No system deployment history compiled yet.'}
-      </div>
-    </div>
-  `;
-}
-
-/* ============================= SYSTEM STRUCTURAL UTILITIES ============================= */
-function typeName(id){
-  let obj = ASSET_TYPES.find(x => x.id === id);
-  return obj ? obj.name : 'Unknown Device System';
-}
-
-function fmtDate(ms){
-  if(!ms) return 'N/A';
-  let d = new Date(ms);
-  let day = String(d.getDate()).padStart(2,'0');
-  let m = String(d.getMonth()+1).padStart(2,'0');
-  return `${day}.${m}.${d.getFullYear()}`;
-}
-
-function escapeHtml(str) {
-  if(!str) return '';
-  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-}
-
-/* ============================= BULK PROCESSING ACTIONS ============================= */
-function exportToExcel(){
-  if(STATE.assets.length === 0) { alert('No assets structure elements available to export.'); return; }
-  let rows = STATE.assets.map(a => ({
-    'Asset Number': a.assetNumber,
-    'Name/Description': a.name,
-    'System Category': typeName(a.typeId),
-    'Facility Location': a.location,
-    'Current Status': STATUS_DEF[a.status].label,
-    'Next PM Target Date': fmtDate(a.nextPmDate)
-  }));
-  let ws = XLSX.utils.json_to_sheet(rows);
-  let wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Facility Assets Data");
-  XLSX.writeFile(wb, "Cluj_Facility_Assets_Matrix.xlsx");
-}
-
-function printSingleLabel(num){
-  const div = document.createElement('div');
-  div.style.position = 'fixed';
-  div.style.left = '-9999px'; div.id = 'temp-print-box';
-  document.body.appendChild(div);
-  
-  new QRCode(div, { text: 'ASSET:' + num, width: 120, height: 120 });
-  
-  setTimeout(() => {
-    let img = div.querySelector('img');
-    let src = img ? img.src : div.querySelector('canvas').toDataURL();
-    
-    const { jsPDF } = window.jspdf;
-    let doc = new jsPDF({ unit: 'mm', format: [60, 40] });
-    doc.setFont("courier", "bold"); doc.setFontSize(10);
-    doc.text("CLUJ FACILITY", 5, 8);
-    doc.setFontSize(8); doc.setFont("helvetica", "normal");
-    doc.text("ID: " + num, 5, 14);
-    doc.addImage(src, 'PNG', 15, 16, 22, 22);
-    doc.save(`Label_${num}.pdf`);
-    div.remove();
-  }, 200);
-}
-
-function triggerPrintLabelSheet(){
-  if(STATE.assets.length === 0) { alert('No operational records to display on label arrays.'); return; }
-  const { jsPDF } = window.jspdf;
-  let doc = new jsPDF();
-  let idx = 0;
-  
-  function processNext(){
-    if(idx >= STATE.assets.length){
-      doc.save("Facility_Industrial_Labels_Matrix.pdf");
+  if(fileInput && fileInput.files && fileInput.files[0]){
+    const file = fileInput.files[0];
+    if(file.size > 1.5*1024*1024){
+      toast('File over 1.5MB — use the link field instead');
       return;
     }
-    let a = STATE.assets[idx];
-    let d = document.createElement('div');
-    d.style.position = 'fixed';
-    d.style.left = '-9999px';
-    document.body.appendChild(d);
-    new QRCode(d, { text: 'ASSET:' + a.assetNumber, width: 100, height: 100 });
-    
-    setTimeout(() => {
-      let img = d.querySelector('img');
-      let src = img ? img.src : d.querySelector('canvas').toDataURL();
-      
-      let row = Math.floor((idx % 24) / 4);
-      let col = idx % 4;
-      let x = 15 + (col * 45);
-      let y = 15 + (row * 42);
-      
-      doc.rect(x, y, 40, 38);
-      doc.setFont("courier", "bold"); doc.setFontSize(8);
-      doc.text("CLUJ FACILITY", x+3, y+6);
-      doc.setFont("helvetica", "normal"); doc.setFontSize(7);
-      doc.text("ID: " + a.assetNumber, x+3, y+12);
-      doc.addImage(src, 'PNG', x+7, y+14, 22, 22);
-      
-      d.remove();
-      idx++;
-      if(idx % 24 === 0 && idx < STATE.assets.length) doc.addPage();
-      processNext();
-    }, 100);
-  }
-  processNext();
-}
 
-async function wipeLocalSystemMemory(){
-  if(confirm('Are you absolutely certain you want to purge your entire system database context?')){
-    try {
-      const { error: err1 } = await supabaseClient.from('assets').delete().neq('assetNumber', '');
-      const { error: err2 } = await supabaseClient.from('action_logs').delete().neq('id', '');
-      if (err1 || err2) throw (err1 || err2);
-      alert('Cloud backend memory successfully purged.');
-      location.reload();
-    } catch (e) {
-      alert('Purge operation failed: ' + e.message);
-    }
+    const data = await new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onload = ()=>resolve(reader.result);
+      reader.onerror = ()=>reject(reader.error || new Error('Unable to read the file'));
+      reader.readAsDataURL(file);
+    }).catch(error=>{
+      console.error(error);
+      toast('Could not read the selected document');
+      return null;
+    });
+
+    if(!data) return;
+
+    const docKey = 'doc:'+action.id;
+    const documentSaved = await safeSet(docKey, {
+      filename:file.name,
+      mime:file.type,
+      data
+    });
+    if(!documentSaved) return;
+
+    action.docRef = {
+      key:docKey,
+      filename:file.name,
+      mime:file.type,
+      size:file.size
+    };
   }
+
+  STATE.actions.push(action);
+  const saveRequests = [safeSet('actions', STATE.actions)];
+  if(actionType==='intervention'){
+    saveRequests.push(safeSet('assets', STATE.assets));
+  }
+  const results = await Promise.all(saveRequests);
+
+  if(results.some(result=>!result)){
+    STATE.assets = previousAssets;
+    STATE.actions = previousActions;
+    await loadCloudState(false);
+    render();
+    return;
+  }
+
+  toast('Action saved to the cloud');
+  if(assetNumbers.length===1){ viewAssetProfile(assetNumbers[0]); }
+  else{ navigate(STATE.role==='vendor' ? 'scan' : 'assets'); }
 }
+async function downloadDoc(actionId){
+const rec = await safeGet('doc:'+actionId);
+if(!rec){ toast('Document not found'); return; }
+const a = document.createElement('a');
+a.href = rec.data; a.download = rec.filename;
+document.body.appendChild(a); a.click(); a.remove();
+}
+/* ============================= SCAN / LOOKUP ============================= */
+function renderScan(){
+return `
+<div class="card" style="max-width:480px;">
+<label class="flabel">Scan or type asset number</label>
+<input class="field" id="scan-input" placeholder="Scan barcode or type Asset Number, then press Enter" onkeydown="if(event.key==='Enter'){doScan();}" autofocus>
+<p style="font-size:12px;color:var(--ink-soft);margin-top:8px;">Works with a handheld barcode scanner (types + Enter automatically), or type the number printed on the asset's QR label. If scanning with a phone camera app, paste the scanned text here.</p>
+<button class="btn btn-primary" style="margin-top:10px;" onclick="doScan()">Look up</button>
+</div>
+<div id="scan-result" style="margin-top:18px;"></div>
+`;
+}
+function doScan(){
+let val = document.getElementById('scan-input').value.trim();
+val = val.replace(/^ASSET:/i,'');
+const a = STATE.assets.find(x=>x.assetNumber.toLowerCase()===val.toLowerCase());
+const resultEl = document.getElementById('scan-result');
+if(!a){ resultEl.innerHTML = `<div class="empty-state">No asset found for "${escapeHtml(val)}".</div>`; return; }
+if(STATE.role==='vendor'){
+viewAssetProfile(a.assetNumber);
+}else{
+resultEl.innerHTML = `<div class="card">${assetGridHtml([a])}</div>`;
+}
+}
+/* ============================= PM SCHEDULE ============================= */
+function renderPM(){
+const critical = STATE.assets.filter(a=>a.priority==='critical' && a.status!=='decommissioned');
+return `
+<p style="color:var(--ink-soft);font-size:12.5px;margin-bottom:14px;">Reminders apply to Critical-priority assets. Set an interval (in days) for each; overdue ones are flagged in red.</p>
+<table class="table">
+<tr><th>Asset</th><th>Type</th><th>Interval (days)</th><th>Last PM</th><th>Next due</th><th>Status</th>${STATE.role==='admin'?'<th></th>':''}</tr>
+${critical.map(a=>{
+const sched = STATE.pmSchedules.find(s=>s.assetNumber===a.assetNumber);
+const info = pmStatusFor(a.assetNumber);
+const lastPM = lastActionOfType(a.assetNumber,'pm');
+return `<tr>
+<td style="font-family:var(--mono)">${escapeHtml(a.assetNumber)}</td>
+<td>${escapeHtml(typeName(a.typeId))}</td>
+<td>${STATE.role==='admin' ? `<input class="field" style="width:80px" type="number" value="${sched?sched.intervalDays:''}" onchange="setPMInterval('${escapeHtml(a.assetNumber)}',this.value)">` : (sched?sched.intervalDays:'—')}</td>
+<td>${lastPM?fmtDate(lastPM.timestamp):'—'}</td>
+<td>${info.nextDue?fmtDate(info.nextDue):(info.noBaseline?'no baseline yet':'—')}</td>
+<td>${info.overdue?'<span class="pill pill-failure">Overdue</span>':(sched&&sched.intervalDays?'<span class="pill pill-operational">On track</span>':'—')}</td>
+${STATE.role==='admin'?`<td><button class="btn btn-sm" onclick="viewAssetProfile('${escapeHtml(a.assetNumber)}')">View</button></td>`:''}
+</tr>`;
+}).join('')}
+</table>
+${!critical.length ? '<div class="empty-state">No critical-priority assets yet.</div>' : ''}
+`;
+}
+async function setPMInterval(assetNumber, days){
+  const previous = JSON.parse(JSON.stringify(STATE.pmSchedules));
+  let schedule = STATE.pmSchedules.find(s=>s.assetNumber===assetNumber);
+  if(!schedule){
+    schedule = {assetNumber, intervalDays:null};
+    STATE.pmSchedules.push(schedule);
+  }
+  schedule.intervalDays = days ? Number(days) : null;
+
+  const saved = await safeSet('pm-schedules', STATE.pmSchedules);
+  if(!saved){
+    STATE.pmSchedules = previous;
+    render();
+    return;
+  }
+  toast('Schedule updated in the cloud');
+}
+/* ============================= REPORTS ============================= */
+function renderReports(){
+return `
+<div class="card" style="max-width:480px;">
+<label class="flabel">Select asset</label>
+<select class="field" id="rep-asset">
+<option value="">Choose…</option>
+${STATE.assets.map(a=>`<option value="${escapeHtml(a.assetNumber)}">${escapeHtml(a.assetNumber)} — ${escapeHtml(typeName(a.typeId))}</option>`).join('')}
+</select>
+<button class="btn btn-primary" style="margin-top:12px;" onclick="goToProfileFromReports()">Open report</button>
+</div>
+`;
+}
+function goToProfileFromReports(){
+const v = document.getElementById('rep-asset').value;
+if(!v){ toast('Choose an asset'); return; }
+viewAssetProfile(v);
+}
+function downloadAssetPDF(assetNumber){
+const a = STATE.assets.find(a=>a.assetNumber===assetNumber);
+if(!a || !window.jspdf){ toast('PDF library not ready'); return; }
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+let y = 18;
+doc.setFontSize(16); doc.text('Asset Report', 14, y); y+=8;
+doc.setFontSize(11);
+doc.text('Asset Number: '+a.assetNumber, 14, y); y+=6;
+doc.text('Type: '+typeName(a.typeId), 14, y); y+=6;
+doc.text('Manufacturer ID: '+(a.assetId||'—'), 14, y); y+=6;
+doc.text('Purchase date: '+fmtDate(a.purchaseDate), 14, y); y+=6;
+doc.text('Price: '+(a.price||'—'), 14, y); y+=6;
+doc.text('Priority: '+PRIORITY_DEF[a.priority].label, 14, y); y+=6;
+doc.text('Status: '+STATUS_DEF[a.status].label, 14, y); y+=10;
+doc.setFontSize(13); doc.text('History', 14, y); y+=8;
+doc.setFontSize(10);
+const history = actionsForAsset(assetNumber);
+if(!history.length){ doc.text('No actions logged.', 14, y); }
+history.forEach(h=>{
+if(y>270){ doc.addPage(); y=18; }
+doc.text(`${fmtDateTime(h.timestamp)} — ${ACTION_LABEL[h.type]}${h.resultingStatus?(' -> '+STATUS_DEF[h.resultingStatus].label):''}`, 14, y); y+=5;
+if(h.description){ doc.text(' '+h.description, 14, y); y+=5; }
+if(h.notes){ doc.text(' '+h.notes, 14, y); y+=5; }
+if(h.docRef){ doc.text(' Document: '+h.docRef.filename, 14, y); y+=5; }
+if(h.docLink){ doc.text(' Link: '+h.docLink, 14, y); y+=5; }
+y+=3;
+});
+doc.save('asset-report-'+assetNumber+'.pdf');
+}
+function qrDataUrl(text, size){
+if(typeof QRCode==='undefined') return null;
+const div = document.createElement('div');
+div.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+document.body.appendChild(div);
+new QRCode(div, {text:text, width:size||200, height:size||200});
+const canvas = div.querySelector('canvas');
+const dataUrl = canvas ? canvas.toDataURL('image/png') : null;
+document.body.removeChild(div);
+return dataUrl;
+}
+function printLabel(assetNumber){
+if(typeof window.jspdf==='undefined'){ toast('PDF library failed to load — check your connection and reload'); return; }
+const a = getAsset(assetNumber);
+const dataUrl = qrDataUrl('ASSET:'+assetNumber, 300);
+if(!dataUrl){ toast('QR library failed to load — check your connection and reload'); return; }
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({unit:'mm', format:[70,80]});
+doc.addImage(dataUrl, 'PNG', 15, 8, 40, 40);
+doc.setFontSize(12);
+doc.text(assetNumber, 35, 55, {align:'center'});
+doc.setFontSize(8);
+doc.text(typeName(a.typeId), 35, 61, {align:'center'});
+doc.save('label-'+assetNumber+'.pdf');
+toast('Label downloaded — open the PDF to print or share it');
+}
+function downloadLabelSheet(list){
+if(!list.length){ toast('No assets to include'); return; }
+if(typeof window.jspdf==='undefined' || typeof QRCode==='undefined'){ toast('Required libraries failed to load — check your connection and reload'); return; }
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF({unit:'mm', format:'a4'});
+const cols=3, rows=4, cellW=60, cellH=65, marginX=15, marginY=15;
+const perPage = cols*rows;
+list.forEach((a, idx)=>{
+const posInPage = idx % perPage;
+if(idx>0 && posInPage===0) doc.addPage();
+const col = posInPage % cols, row = Math.floor(posInPage/cols);
+const x = marginX + col*cellW, y = marginY + row*cellH;
+const dataUrl = qrDataUrl('ASSET:'+a.assetNumber, 200);
+if(dataUrl) doc.addImage(dataUrl, 'PNG', x+10, y, 40, 40);
+doc.setFontSize(10);
+doc.text(a.assetNumber, x+30, y+46, {align:'center'});
+doc.setFontSize(7);
+doc.text(typeName(a.typeId), x+30, y+51, {align:'center'});
+});
+doc.save('asset-qr-labels.pdf');
+toast(list.length+' label(s) in one PDF — print on sticker sheets or paper and cut out');
+}
+/* ============================= SETTINGS ============================= */
+function renderSettings(){
+return `
+<h3 style="margin-bottom:12px;">Asset types & checklists</h3>
+${STATE.types.map(t=>`
+<div class="card" style="margin-bottom:14px;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+<strong>${escapeHtml(t.name)}</strong>
+<span style="font-size:12px;color:var(--ink-soft)">${assetsOfType(t.id).length} assets</span>
+</div>
+<div class="form-grid">
+<div>
+<label class="flabel">Check checklist</label>
+${t.check.map((it,i)=>`<div class="checklist-item"><span style="flex:1">${escapeHtml(it)}</span><button class="btn btn-sm" onclick="removeChecklistItem('${t.id}','check',${i})">✕</button></div>`).join('')}
+<div style="display:flex;gap:6px;margin-top:6px;"><input class="field" id="new-check-${t.id}" placeholder="Add item…"><button class="btn btn-sm" onclick="addChecklistItem('${t.id}','check')">Add</button></div>
+</div>
+<div>
+<label class="flabel">Preventive maintenance checklist</label>
+${t.pm.map((it,i)=>`<div class="checklist-item"><span style="flex:1">${escapeHtml(it)}</span><button class="btn btn-sm" onclick="removeChecklistItem('${t.id}','pm',${i})">✕</button></div>`).join('')}
+<div style="display:flex;gap:6px;margin-top:6px;"><input class="field" id="new-pm-${t.id}" placeholder="Add item…"><button class="btn btn-sm" onclick="addChecklistItem('${t.id}','pm')">Add</button></div>
+</div>
+</div>
+</div>
+`).join('')}
+<div class="card">
+<label class="flabel">Add a new asset type</label>
+<div style="display:flex;gap:8px;">
+<input class="field" id="new-type-name" placeholder="Type name">
+<button class="btn btn-primary" onclick="addAssetType()">Add type</button>
+</div>
+</div>
+`;
+}
+async function addChecklistItem(typeId, kind){
+  const input = document.getElementById('new-'+kind+'-'+typeId);
+  const value = input.value.trim();
+  if(!value) return;
+
+  const previous = JSON.parse(JSON.stringify(STATE.types));
+  const type = STATE.types.find(t=>t.id===typeId);
+  type[kind].push(value);
+
+  const saved = await safeSet('asset-types', STATE.types);
+  if(!saved){ STATE.types = previous; }
+  render();
+}
+async function removeChecklistItem(typeId, kind, idx){
+  const previous = JSON.parse(JSON.stringify(STATE.types));
+  const type = STATE.types.find(t=>t.id===typeId);
+  type[kind].splice(idx,1);
+
+  const saved = await safeSet('asset-types', STATE.types);
+  if(!saved){ STATE.types = previous; }
+  render();
+}
+async function addAssetType(){
+  const name = document.getElementById('new-type-name').value.trim();
+  if(!name){ toast('Enter a name'); return; }
+
+  const previous = JSON.parse(JSON.stringify(STATE.types));
+  const id = name.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')+'-'+uid().slice(0,4);
+  STATE.types.push({id, name, check:[], pm:[]});
+
+  const saved = await safeSet('asset-types', STATE.types);
+  if(!saved){
+    STATE.types = previous;
+    render();
+    return;
+  }
+
+  toast('Type added to the cloud');
+  render();
+}
+/* ============================= IMPORT / EXPORT ============================= */
+function openImportModal(){
+openModal('Import assets from Excel','Upload a file using the template columns: Asset Number, Asset ID, Type of Asset, Purchase Date, Price, Priority.', `
+<input type="file" class="field" id="import-file" accept=".xlsx,.xls,.csv">
+<div id="import-summary" style="margin-top:12px;font-size:12.5px;"></div>
+`, `<button class="btn" onclick="closeModal()">Close</button><button class="btn btn-primary" onclick="runImport()">Import</button>`);
+}
+function runImport(){
+  if(typeof XLSX==='undefined'){
+    toast('Excel library failed to load — check your connection and reload');
+    return;
+  }
+
+  const fileInput = document.getElementById('import-file');
+  if(!fileInput.files[0]){ toast('Choose a file'); return; }
+
+  const reader = new FileReader();
+  reader.onload = async function(event){
+    const previousAssets = JSON.parse(JSON.stringify(STATE.assets));
+    const wb = XLSX.read(event.target.result, {type:'array', cellDates:true});
+    const sheetName = wb.SheetNames.find(name=>name.toLowerCase().includes('import')) || wb.SheetNames[0];
+    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], {defval:''});
+    let added = 0;
+    let updated = 0;
+    const skipped = [];
+
+    rows.forEach((row, index)=>{
+      const num = String(row['Asset Number']||'').trim();
+      const typeLabel = String(row['Type of Asset']||'').trim();
+      if(!num){ skipped.push('Row '+(index+2)+': missing Asset Number'); return; }
+
+      const type = STATE.types.find(item=>item.name.toLowerCase()===typeLabel.toLowerCase());
+      if(!type){ skipped.push('Row '+(index+2)+': unknown type "'+typeLabel+'"'); return; }
+
+      let priority = String(row['Priority']||'').toLowerCase().trim();
+      if(!['low','medium','critical'].includes(priority)) priority='medium';
+
+      let purchaseDate = row['Purchase Date'];
+      if(purchaseDate instanceof Date) purchaseDate = purchaseDate.toISOString().slice(0,10);
+      else if(purchaseDate) purchaseDate = String(purchaseDate);
+
+      const price = row['Price'] ? parseFloat(row['Price']) : undefined;
+      const assetId = String(row['Asset ID']||'').trim();
+      const existing = STATE.assets.find(asset=>asset.assetNumber===num);
+
+      if(existing){
+        existing.assetId = assetId || existing.assetId;
+        existing.typeId = type.id;
+        existing.purchaseDate = purchaseDate || existing.purchaseDate;
+        existing.price = price !== undefined ? price : existing.price;
+        existing.priority = priority;
+        updated++;
+      }else{
+        STATE.assets.push({
+          assetNumber:num,
+          assetId,
+          typeId:type.id,
+          purchaseDate,
+          price,
+          priority,
+          status:'operational',
+          createdAt:new Date().toISOString()
+        });
+        added++;
+      }
+    });
+
+    const saved = await safeSet('assets', STATE.assets);
+    if(!saved){
+      STATE.assets = previousAssets;
+      return;
+    }
+
+    document.getElementById('import-summary').innerHTML =
+      `Added ${added}, updated ${updated}, skipped ${skipped.length}.` +
+      (skipped.length ? '<br>'+skipped.join('<br>') : '');
+    toast('Import saved to the cloud');
+  };
+  reader.readAsArrayBuffer(fileInput.files[0]);
+}
+function exportExcel(){
+if(typeof XLSX==='undefined'){ toast('Excel library failed to load — check your connection and reload'); return; }
+const rows = STATE.assets.map(a=>({
+'Asset Number':a.assetNumber, 'Asset ID':a.assetId||'', 'Type of Asset':typeName(a.typeId),
+'Purchase Date':a.purchaseDate||'', 'Price':a.price||'', 'Priority':PRIORITY_DEF[a.priority].label, 'Status':STATUS_DEF[a.status].label
+}));
+const ws = XLSX.utils.json_to_sheet(rows);
+const wb = XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb, ws, 'Assets');
+XLSX.writeFile(wb, 'assets-export.xlsx');
+}
+/* ============================= MODAL ============================= */
+function openModal(title, sub, bodyHtml, footerHtml){
+const backdrop = document.createElement('div');
+backdrop.className='modal-backdrop'; backdrop.id='modal-backdrop';
+backdrop.innerHTML = `<div class="modal">
+<h3>${title}</h3>
+${sub?`<div class="sub">${sub}</div>`:''}
+<div>${bodyHtml}</div>
+<div class="modal-actions">${footerHtml}</div>
+</div>`;
+backdrop.addEventListener('click', function(e){ if(e.target===backdrop) closeModal(); });
+document.body.appendChild(backdrop);
+}
+function closeModal(){
+const el = document.getElementById('modal-backdrop');
+if(el) el.remove();
+}
+/* ============================= VISITOR (public scan) ============================= */
+function renderVisitor(){
+return `
+<div class="visitor-shell">
+<div class="visitor-card">
+<div style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);">Cluj Facility</div>
+<h2 style="margin:2px 0 14px;">Asset status lookup</h2>
+<input class="field" id="v-scan-input" placeholder="Scan or type asset number" onkeydown="if(event.key==='Enter'){visitorScan();}">
+<button class="btn btn-primary" style="margin-top:10px;width:100%;" onclick="visitorScan()">Look up</button>
+<div id="v-result" style="margin-top:16px;"></div>
+<div style="margin-top:18px;text-align:center;">
+<button class="btn btn-sm" onclick="setRole('admin')">Exit visitor view</button>
+</div>
+</div>
+</div>
+`;
+}
+function attachVisitorEvents(){}
+function visitorScan(){
+let val = document.getElementById('v-scan-input').value.trim().replace(/^ASSET:/i,'');
+const a = STATE.assets.find(x=>x.assetNumber.toLowerCase()===val.toLowerCase());
+const el = document.getElementById('v-result');
+if(!a){ el.innerHTML = `<div class="empty-state">No asset found.</div>`; return; }
+const st = STATUS_DEF[a.status];
+const last = actionsForAsset(a.assetNumber)[0];
+el.innerHTML = `
+<div class="card">
+<div style="font-family:var(--mono);font-weight:600;font-size:16px;">${escapeHtml(a.assetNumber)}</div>
+<div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px;">${escapeHtml(typeName(a.typeId))}</div>
+<span class="pill pill-${a.status}">${st.label}</span>
+<div style="font-size:12px;color:var(--ink-soft);margin-top:10px;">
+${last ? 'Last '+ACTION_LABEL[last.type].toLowerCase()+' on '+fmtDate(last.timestamp) : 'No recorded activity yet.'}
+</div>
+</div>
+`;
+}
+/* ============================= EVENT ATTACH (for dynamically inserted views) ============================= */
+function attachRouteEvents(){
+if(STATE.route==='log-action'){ renderLogActionFields(); }
+if(STATE.route==='asset-profile'){
+const qrBox = document.getElementById('qr-canvas');
+if(qrBox && window.QRCode){ qrBox.innerHTML=''; new QRCode(qrBox, {text:'ASSET:'+STATE.selectedAsset, width:110, height:110}); }
+}
+}
+init();
 </script>
 </body>
 </html>
